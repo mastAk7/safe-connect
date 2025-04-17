@@ -1,0 +1,197 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #f0f4ff;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  header {
+    background-color: #4e54c8;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .victim-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .victim-card {
+    background: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    border-left: 6px solid #4e54c8;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .victim-card:hover {
+    background: #f3f6ff;
+  }
+  
+  .victim-card h3 {
+    margin: 0 0 5px;
+    font-size: 18px;
+  }
+  
+  .victim-card p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+  }
+  
+  .emergency-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  }
+  
+  .emergency-section h2 {
+    margin-top: 0;
+    color: #b30000;
+    font-size: 22px;
+  }
+  
+  .highlight {
+    border-left-color: #ff4d4d;
+  }
+  
+  .actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .chat-btn, .call-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .chat-btn {
+    background: #cde6ff;
+    color: #005bbb;
+  }
+  
+  .call-btn {
+    background: #ffd2d2;
+    color: #a30000;
+  }
+  
+  /* Map container in volunteer page */
+.volunteer-map-container {
+  height: 300px;
+  margin: 15px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Distance info */
+.distance {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Emergency type indicators */
+.emergency-type {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-top: 5px;
+  color: white;
+}
+
+.emergency-type.medical {
+  background-color: var(--medical);
+}
+
+.emergency-type.criminal {
+  background-color: var(--criminal);
+}
+
+.emergency-type.accident {
+  background-color: var(--accident);
+}
+
+.emergency-type.fire {
+  background-color: var(--fire);
+}
+
+/* Profile modal */
+.profile-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.profile-content {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.respond-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.victim-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.close-btn {
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+}

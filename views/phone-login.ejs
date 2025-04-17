@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phone Login</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <style>
+    .hidden {
+      display: none;
+    }
+    .error-message {
+      color: red;
+    }
+    .success-message {
+      color: green;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #cccccc;
+    }
+  </style> 
+</head>
+<body>
+  <div class="container">
+    <h1>Phone Authentication</h1>
+    
+    <div id="phone-container">
+      <div class="form-group">
+        <label for="phone-number">Phone Number (with country code)</label>
+        <input type="tel" id="phone-number" placeholder="+1234567890">
+        <small>Example: +1 for US, +44 for UK, +91 for India</small>
+      </div>
+      <div id="recaptcha-container" class="form-group"></div>
+      <button id="send-otp" disabled>Send OTP</button>
+    </div>
+    
+    <div id="otp-container" class="hidden">
+      <div class="form-group">
+        <label for="otp-code">Enter the verification code</label>
+        <input type="text" id="otp-code" placeholder="123456">
+      </div>
+      <button id="verify-otp">Verify</button>
+    </div>
+    
+    <div id="message" class="hidden"></div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "<%= process.env.FIREBASE_API_KEY %>",
+      authDomain: "<%= process.env.FIREBASE_PROJECT_ID %>.firebaseapp.com",
+      projectId: "<%= process.env.FIREBASE_PROJECT_ID %>",
+      storageBucket: "<%= process.env.FIREBASE_PROJECT_ID %>.appspot.com",
+      messagingSenderId: "<%= process.env.FIREBASE_MESSAGING_SENDER_ID %>",
+      appId: "<%= process.env.FIREBASE_APP_ID %>"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    auth.languageCode = 'en';
+    
+    // DOM elements
+    const phoneContainer = document.getElementById('phone-container');
+    const otpContainer = document.getElementById('otp-container');
+    const phoneInput = document.getElementById('phone-number');
+    const otpInput = document.getElementById('otp-code');
+    const sendOtpButton = document.getElementById('send-otp');
+    const verifyOtpButton = document.getElementById('verify-otp');
+    const messageElement = document.getElementById('message');
+    
+    // Initialize reCAPTCHA verifier
+    window.onload = function() {
+      window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        'size': 'normal',
+        'callback': (response) => {
+          // reCAPTCHA solved, enable button
+          sendOtpButton.disabled = false;
+        },
+        'expired-callback': () => {
+          // Response expired. Ask user to solve reCAPTCHA again.
+          sendOtpButton.disabled = true;
+        }
+      });
+      window.recaptchaVerifier.render();
+    };
+    
+    // Global confirmation result
+    let confirmationResult;
+    
+    // Helper functions
+    function showMessage(text, isError = false) {
+      messageElement.textContent = text;
+      messageElement.className = isError ? 'error-message' : 'success-message';
+      messageElement.classList.remove('hidden');
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        messageElement.classList.add('hidden');
+      }, 5000);
+    }
+    
+    // Send OTP
+    sendOtpButton.addEventListener('click', () => {
+      const phoneNumber = phoneInput.value.trim();
+      
+      if (!phoneNumber) {
+        showMessage('Please enter a valid phone number', true);
+        return;
+      }
+      
+      auth.signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+        .then(result => {
+          // SMS sent successfully
+          confirmationResult = result;
+          showMessage('Verification code sent to your phone!');
+          
+          // Hide phone input, show OTP input
+          phoneContainer.classList.add('hidden');
+          otpContainer.classList.remove('hidden');
+        })
+        .catch(error => {
+          showMessage('Error sending verification code: ' + error.message, true);
+          
+          // Reset reCAPTCHA
+          window.recaptchaVerifier.render().then(widgetId => {
+            grecaptcha.reset(widgetId);
+          });
+        });
+    });
+    
+    // Verify OTP
+    verifyOtpButton.addEventListener('click', () => {
+      const otp = otpInput.value.trim();
+      
+      if (!otp) {
+        showMessage('Please enter the verification code', true);
+        return;
+      }
+      
+      confirmationResult.confirm(otp)
+        .then(result => {
+          // OTP verified successfully
+          showMessage('Phone verified successfully!');
+          
+          // Get the ID token
+          return result.user.getIdToken();
+        })
+        .then(idToken => {
+          // Send the token to your server
+          return fetch('/auth/phone/verify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ idToken }),
+            credentials: 'include'
+          });
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showMessage('Login successful! Redirecting...');
+            // Redirect to blog page
+            setTimeout(() => {
+              window.location.href = data.redirect || '/blog';
+            }, 1000);
+          } else {
+            showMessage('Server error: ' + data.message, true);
+          }
+        })
+        .catch(error => {
+          showMessage('Error verifying code: ' + error.message, true);
+        });
+    });
+  </script>
+</body>
+</html>

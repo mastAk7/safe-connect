@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Volunteer SOS</title>
+  <link rel="stylesheet" href="volunteer-sos.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚨 VOLUNTEER - SOS</h1>
+      <div class="user-info">
+        <p>Volunteer: <%= user.name %></p>
+        <a href="/logout" class="logout-btn">Logout</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="emergency-section">
+        <h2>Emergency</h2>
+        <% if (emergencyAlerts && emergencyAlerts.length > 0) { %>
+          <% emergencyAlerts.forEach(alert => { %>
+            <div class="victim-card highlight" data-id="<%= alert._id %>">
+              <h3><%= alert.user.name %></h3>
+              <p><%= alert.addressDisplay %></p>
+              <p class="emergency-type <%= alert.emergencyType %>"><%= alert.emergencyType %></p>
+              <div class="distance"><%= alert.distance %> km away</div>
+              <div class="actions">
+                <button class="chat-btn" onclick="startChat('<%= alert._id %>')">💬 Chat</button>
+                <button class="call-btn" onclick="startCall('<%= alert._id %>')">📞 Call</button>
+                <button class="respond-btn" onclick="respondToEmergency('<%= alert._id %>')">🚨 Respond</button>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p class="no-alerts">No emergency alerts at this time.</p>
+        <% } %>
+      </section>
+
+      <h2>Nearby Alerts</h2>
+      <section class="victim-list">
+        <% if (pendingAlerts && pendingAlerts.length > 0) { %>
+          <% pendingAlerts.forEach(alert => { %>
+            <div class="victim-card" onclick="openVictimProfile('<%= alert.user.name %>', '<%= alert._id %>')">
+              <h3><%= alert.user.name %></h3>
+              <p><%= alert.addressDisplay %></p>
+              <div class="distance"><%= alert.distance %> km away</div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <p class="no-alerts">No pending alerts at this time.</p>
+        <% } %>
+      </section>
+    </main>
+
+    <!-- Map for displaying victim locations -->
+    <div id="volunteer-map"></div>
+  </div>
+
+  <script src="volunteer-sos.js"></script>
+</body>
+</html>

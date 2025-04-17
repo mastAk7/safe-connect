@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Blog</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1><%= heading %></h1>
+
+    <% if (locals.post) { %>
+      <form id="editForm" method="post" action="/add/posts/<%=post._id%>" enctype="multipart/form-data">
+        <input type="text" name="title" value="<%=post.title %>" required>
+        <textarea name="content" rows="10" required><%=post.content %></textarea>
+        <input type="text" name="author" value="<%=post.author %>" readonly>
+        
+        <% if(post.image) { %>
+        <div>
+            <img src="<%= post.image %>" alt="Post Image" style="max-width: 300px;"/>
+        </div>
+        <% } else { %>
+        <p>No image currently uploaded</p>
+        <% } %>
+        
+        <label for="image">Change Image:</label>
+        <input type="file" name="image" accept="image/*">
+        <button class="full-width" type="submit"><%= submit %></button>
+      </form>
+    <% } else { %>
+      <form id="newPostForm" method="post" action="/add/posts" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Title" required>
+        <textarea name="content" placeholder="Content" required rows="10"></textarea>
+        <input type="file" name="image" accept="image/*">
+        <input type="text" name="author" placeholder="Author" value="<%= locals.user.email %>" readonly required>
+        
+        <div class="form-group">
+          <label for="intensity">Intensity (0-100)</label>
+          <input type="range" id="intensity" name="intensity" min="0" max="100" value="50">
+          <output for="intensity">50</output>
+        </div>
+        
+        <!-- Location section -->
+        <div id="location-section" class="form-group">
+          <h3>Post Location</h3>
+          <div id="location-controls">
+            <button type="button" id="use-current-location">Use my current location</button>
+            <div class="location-search">
+              <input type="text" id="location-search" placeholder="Search for a location">
+              <button type="button" id="search-location">Search</button>
+            </div>
+          </div>
+          
+          <div id="location-map" style="height: 300px; margin-top: 10px;"></div>
+          
+          <div id="location-display" style="display: none; margin-top: 10px;">
+            <p>Selected location: <span id="selected-location"></span></p>
+          </div>
+          
+          <!-- Hidden fields for location data -->
+          <input type="hidden" id="post-lat" name="lat">
+          <input type="hidden" id="post-lng" name="lng">
+          <input type="hidden" id="post-address" name="address">
+        </div>
+        
+        <button class="full-width" type="submit"><%= submit %></button>
+      </form>
+    <% } %>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const intensitySlider = document.getElementById('intensity');
+      if (intensitySlider) {
+        const intensityOutput = intensitySlider.nextElementSibling;
+        
+        intensitySlider.addEventListener('input', () => {
+          intensityOutput.textContent = intensitySlider.value;
+          // Change color based on intensity
+          const hue = (100 - intensitySlider.value) * 1.2; // 120 is green, 0 is red
+          intensityOutput.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+          intensityOutput.style.color = 'white';
+          intensityOutput.style.padding = '2px 6px';
+          intensityOutput.style.borderRadius = '4px';
+        });
+        
+        // Trigger the input event to set initial color
+        intensitySlider.dispatchEvent(new Event('input'));
+      }
+    });
+  </script>
+  <script src="/location-handler.js"></script>
+</body>
+</html>

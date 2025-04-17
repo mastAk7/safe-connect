@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeConnect - Emergency Response</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="emergency.css">
+</head>
+<body>
+  <div class="emergency-screen">
+      <!-- Top Bar -->
+      <div class="top-bar">
+          <h1>Emergency Response</h1>
+          <div class="user-info">
+            <small>User: <%= user.name %></small>
+          </div>
+      </div>
+
+      <!-- Countdown Timer -->
+      <% if (showCountdown) { %>
+      <div class="countdown-container">
+          <div class="countdown-text">Alert will be sent automatically in</div>
+          <div class="countdown-timer" id="countdown">10</div>
+          <button class="cancel-btn" id="cancel-countdown">Cancel</button>
+      </div>
+      <% } %>
+
+      <!-- Main Container -->
+      <div class="container">
+          <!-- Emergency Type Selection -->
+          <div>
+              <div class="section-title">What type of emergency?</div>
+              <div class="emergency-types">
+                  <div class="emergency-type medical" id="type-medical">
+                      <i class="fas fa-heartbeat"></i>
+                      <span>Medical</span>
+                  </div>
+                  <div class="emergency-type criminal" id="type-criminal">
+                      <i class="fas fa-shield-alt"></i>
+                      <span>Criminal</span>
+                  </div>
+                  <div class="emergency-type accident" id="type-accident">
+                      <i class="fas fa-car-crash"></i>
+                      <span>Accident</span>
+                  </div>
+                  <div class="emergency-type fire" id="type-fire">
+                      <i class="fas fa-fire"></i>
+                      <span>Fire</span>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Location Section -->
+          <div class="location-section">
+              <div class="section-title">Confirm your location</div>
+              <div class="location-info">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <div class="location-address" id="user-address">Locating you...</div>
+              </div>
+              <div class="map-preview">
+                  <img src="/api/placeholder/400/150" alt="Map preview" class="map-placeholder">
+              </div>
+              <input type="hidden" id="user-lat" value="">
+              <input type="hidden" id="user-lng" value="">
+              <button class="confirm-location">Confirm Location</button>
+          </div>
+
+          <!-- Description Section -->
+          <div class="description-section">
+              <div class="section-title">Describe the emergency</div>
+              <textarea class="description-input" placeholder="Provide details about the emergency..."></textarea>
+          </div>
+
+          <!-- Additional Options Section -->
+          <div class="options-section">
+              <div class="section-title">Additional Options</div>
+             
+              <!-- Severity Slider -->
+              <div class="severity-container">
+                  <div class="option-label">Severity Level</div>
+                  <div class="severity-labels">
+                      <span>Low</span>
+                      <span>Medium</span>
+                      <span>High</span>
+                  </div>
+                  <input type="range" min="1" max="5" value="3" class="severity-slider" id="severity-slider">
+              </div>
+             
+              <!-- Anonymous Report -->
+              <div class="option-item">
+                  <div class="option-label">Report Anonymously</div>
+                  <label class="toggle-switch">
+                      <input type="checkbox">
+                      <span class="toggle-slider"></span>
+                  </label>
+              </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+              <button class="submit-btn">Send Alert</button>
+          </div>
+      </div>
+
+      <!-- Status Section -->
+      <% if (activeAlert) { %>
+      <div class="status-section">
+          <div class="status-container">
+              <div class="status-info">
+                  <div class="status-title">
+                    <% if (activeAlert.status === 'active') { %>
+                      Connecting to Emergency Services
+                    <% } else if (activeAlert.status === 'responding') { %>
+                      Help is on the way!
+                    <% } %>
+                  </div>
+                  <div class="status-message">
+                    <% if (activeAlert.status === 'active') { %>
+                      Alert sent to <%= activeAlert.notifiedVolunteers.length %> nearby volunteers
+                    <% } else if (activeAlert.status === 'responding') { %>
+                      <%= activeAlert.responderName %> is coming to help you
+                    <% } %>
+                  </div>
+              </div>
+              <div class="status-icon">
+                  <i class="fas fa-sync fa-spin"></i>
+              </div>
+          </div>
+         
+          <button class="safe-now-btn" data-alert-id="<%= activeAlert._id %>">I'm Safe Now</button>
+         
+          <div class="communication-options">
+              <button class="comm-btn chat-btn">
+                  <i class="fas fa-comment"></i> Chat
+              </button>
+              <button class="comm-btn call-btn">
+                  <i class="fas fa-phone-alt"></i> Call
+              </button>
+          </div>
+      </div>
+      <% } %>
+  </div>
+
+  <script src="emergency.js"></script>
+</body>
+</html>

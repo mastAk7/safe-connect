@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
+</head> 
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>My Blog</h1> 
+      <div class="user-panel"> 
+        <p>Welcome, <%= user.name %></p>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+    
+    <a id="newPostBtn" href="/new">New Post</a>
+    
+    <ul id="postsList">
+      <% posts.forEach(post => { %>
+        <li>
+          <h2><%= post.title %></h2> 
+          <small><%= post.date %></small>
+          <p><%= post.content %></p>
+          <small>By: <%= post.author %></small>
+          <% if (post.imageBase64) { %>
+            <img src="<%= post.imageBase64 %>" alt="User Image" style="max-width: 300px;"/>
+          <% } else { %>
+            <p>No image</p>
+          <% } %>          
+          
+          <% if (post.author === user.email) { %>
+            <a class="edit" href="/edit/<%= post._id %>">Edit</a>
+            <a class="delete" href="/delete/<%= post._id %>">Delete</a>
+          <% } %>
+        </li>
+      <% }); %>
+    </ul>
+  </div>
+  <!-- Map container -->
+  <div class="map-container-wrapper">
+    <div class="map-controls">
+      <h2>Posts Near You</h2>
+      <button id="refresh-map">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M23 4V10H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M1 20V14H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3.51 9.00008C4.01717 7.56686 4.87913 6.28542 6.01547 5.27549C7.1518 4.26556 8.52547 3.55916 10.0083 3.22472C11.4911 2.89028 13.0348 2.93899 14.4952 3.36717C15.9556 3.79535 17.2853 4.58775 18.36 5.66008L23 10.0001M1 14.0001L5.64 18.3401C6.71475 19.4124 8.04437 20.2048 9.50481 20.633C10.9652 21.0612 12.5089 21.1099 13.9917 20.7754C15.4745 20.441 16.8482 19.7346 17.9845 18.7247C19.1209 17.7147 19.9828 16.4333 20.49 15.0001" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+    <div id="map-container"></div>
+  </div>
+
+  <div class="header">
+    <h1>My Blog</h1> 
+    <div class="user-panel"> 
+      <p>Welcome, <%= user.name %></p>
+      <a href="/logout">Logout</a>
+      <!-- Add SOS Button -->
+      <a href="/sos" class="sos-button">🚨 SOS</a>
+    </div>
+  </div>
+  
+<script src="/map.js"></script>
+</body>
+
+</html>
