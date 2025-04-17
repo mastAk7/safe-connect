@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeConnect - Resources</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+      :root {
+          --primary: #4169e1;
+          --primary-dark: #2a4cba;
+          --secondary: #ff6b6b;
+          --light: #f8f9fa;
+          --dark: #343a40;
+          --success: #28a745;
+          --danger: #dc3545;
+          --warning: #ffc107;
+          --info: #17a2b8;
+      }
+
+
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+
+      body {
+          background: #f5f7fa;
+          color: var(--dark);
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+      }
+
+
+      /* Header Styles */
+      .header {
+          background: white;
+          padding: 15px 20px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+      }
+
+
+      .logo-container {
+          display: flex;
+          align-items: center;
+      }
+
+
+      .logo {
+          width: 40px;
+          height: 40px;
+          margin-right: 10px;
+      }
+
+
+      .logo-text {
+          font-size: 20px;
+          font-weight: 600;
+          color: var(--primary);
+      }
+
+
+      .header-actions {
+          display: flex;
+          align-items: center;
+      }
+
+
+      .notification-btn, .profile-btn {
+          background: transparent;
+          border: none;
+          font-size: 20px;
+          color: var(--primary);
+          margin-left: 15px;
+          cursor: pointer;
+          position: relative;
+      }
+
+
+      .notification-count {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          background: var(--danger);
+          color: white;
+          font-size: 10px;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+
+
+      /* Main Content Styles */
+      .container {
+          flex: 1;
+          padding: 20px;
+          overflow-y: auto;
+      }
+
+
+      .page-title {
+          font-size: 24px;
+          font-weight: 600;
+          color: var(--primary);
+          margin-bottom: 20px;
+      }
+
+
+      /* Resource Categories */
+      .resource-categories {
+          display: flex;
+          overflow-x: auto;
+          gap: 15px;
+          padding-bottom: 10px;
+          margin-bottom: 20px;
+      }
+
+
+      .category-btn {
+          background-color: white;
+          border: 1px solid var(--primary);
+          border-radius: 50px;
+          padding: 8px 16px;
+          font-size: 14px;
+          color: var(--primary);
+          white-space: nowrap;
+          cursor: pointer;
+          transition: all 0.3s ease;
+      }
+
+
+      .category-btn.active {
+          background-color: var(--primary);
+          color: white;
+      }
+
+
+      .category-btn:hover:not(.active) {
+          background-color: rgba(65, 105, 225, 0.1);
+      }
+
+
+      /* Resource Cards */
+      .resource-section {
+          margin-bottom: 30px;
+      }
+
+
+      .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+      }
+
+
+      .section-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--dark);
+      }
+
+
+      .see-all {
+          font-size: 14px;
+          color: var(--primary);
+          text-decoration: none;
+      }
+
+
+      .resource-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          gap: 20px;
+      }
+
+
+      .resource-card {
+          background-color: white;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+
+      .resource-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+
+      .resource-card-content {
+          padding: 15px;
+      }
+
+
+      .resource-card-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 10px;
+          color: var(--primary-dark);
+      }
+
+
+      .resource-card-desc {
+          font-size: 14px;
+          color: #666;
+          margin-bottom: 15px;
+      }
+
+
+      .resource-card-action {
+          display: flex;
+          justify-content: space-between;
+      }
+
+
+      .resource-btn {
+          background-color: var(--primary);
+          color: white;
+          border: none;
+          border-radius: 5px;
+          padding: 8px 12px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+      }
+
+
+      .resource-btn:hover {
+          background-color: var(--primary-dark);
+      }
+
+
+      .resource-save {
+          background: transparent;
+          border: none;
+          color: #777;
+          cursor: pointer;
+          font-size: 16px;
+      }
+
+
+      .resource-save:hover {
+          color: var(--primary);
+      }
+
+
+      /* Emergency Contact Section */
+      .emergency-contacts {
+          background: linear-gradient(135deg, var(--danger) 0%, #f48779 100%);
+          border-radius: 10px;
+          padding: 20px;
+          color: white;
+          margin-bottom: 20px;
+      }
+
+
+      .emergency-title {
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 15px;
+          display: flex;
+          align-items: center;
+      }
+
+
+      .emergency-title i {
+          margin-right: 10px;
+      }
+
+
+      .emergency-list {
+          list-style: none;
+      }
+
+
+      .emergency-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          padding: 12px 15px;
+          margin-bottom: 10px;
+      }
+
+
+      .emergency-info {
+          flex: 1;
+      }
+
+
+      .emergency-name {
+          font-weight: 600;
+          margin-bottom: 3px;
+      }
+
+
+      .emergency-number {
+          font-size: 14px;
+          opacity: 0.9;
+      }
+
+
+      .call-btn {
+          background: white;
+          color: var(--danger);
+          border: none;
+          border-radius: 50px;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 16px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+      }
+
+
+      .call-btn:hover {
+          transform: scale(1.1);
+      }
+
+
+      /* Video Resources */
+      .video-card {
+          background-color: white;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+
+      .video-thumbnail {
+          position: relative;
+          height: 160px;
+          background-color: #ddd;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+
+
+      .video-play-btn {
+          position: absolute;
+          width: 50px;
+          height: 50px;
+          background-color: rgba(65, 105, 225, 0.8);
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: white;
+          font-size: 20px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+      }
+
+
+      .video-play-btn:hover {
+          background-color: var(--primary);
+          transform: scale(1.1);
+      }
+
+
+      .video-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 5px;
+      }
+
+
+      .video-duration {
+          font-size: 12px;
+          color: #777;
+      }
+
+
+      /* Request Callback Form */
+      .request-callback {
+          background-color: white;
+          border-radius: 10px;
+          padding: 20px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          margin-bottom: 20px;
+      }
+
+
+      .callback-title {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--primary);
+          margin-bottom: 15px;
+      }
+
+
+      .callback-form {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+      }
+
+
+      .form-group {
+          display: flex;
+          flex-direction: column;
+      }
+
+
+      .form-label {
+          font-size: 14px;
+          margin-bottom: 5px;
+          color: #555;
+      }
+
+
+      .form-input {
+          padding: 12px 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 14px;
+      }
+
+
+      .form-input:focus {
+          outline: none;
+          border-color: var(--primary);
+      }
+
+
+      .form-select {
+          padding: 12px 15px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 14px;
+          background-color: white;
+      }
+
+
+      .request-btn {
+          background-color: var(--primary);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          padding: 12px 15px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+      }
+
+
+      .request-btn:hover {
+          background-color: var(--primary-dark);
+      }
+
+
+      /* Downloadable Resources */
+      .download-card {
+          display: flex;
+          align-items: center;
+          background-color: white;
+          border-radius: 10px;
+          padding: 15px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          margin-bottom: 10px;
+      }
+
+
+      .download-icon {
+          width: 40px;
+          height: 40px;
+          background-color: rgba(65, 105, 225, 0.1);
+          border-radius: 8px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: var(--primary);
+          font-size: 20px;
+          margin-right: 15px;
+      }
+
+
+      .download-info {
+          flex: 1;
+      }
+
+
+      .download-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 3px;
+      }
+
+
+      .download-size {
+          font-size: 12px;
+          color: #777;
+      }
+
+
+      .download-btn {
+          background-color: var(--primary);
+          color: white;
+          border: none;
+          border-radius: 5px;
+          padding: 8px 12px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+      }
+
+
+      .download-btn:hover {
+          background-color: var(--primary-dark);
+      }
+
+
+      /* Community Forums */
+      .forum-category {
+          background-color: white;
+          border-radius: 10px;
+          padding: 15px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+          display: flex;
+          align-items: center;
+          margin-bottom: 10px;
+          cursor: pointer;
+          transition: transform 0.3s ease;
+      }
+
+
+      .forum-category:hover {
+          transform: translateX(5px);
+      }
+
+
+      .forum-icon {
+          width: 40px;
+          height: 40px;
+          background-color: rgba(65, 105, 225, 0.1);
+          border-radius: 8px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: var(--primary);
+          font-size: 20px;
+          margin-right: 15px;
+      }
+
+
+      .forum-info {
+          flex: 1;
+      }
+
+
+      .forum-title {
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 3px;
+      }
+
+
+      .forum-stats {
+          font-size: 12px;
+          color: #777;
+      }
+
+
+      .forum-chevron {
+          color: #aaa;
+          font-size: 18px;
+      }
+
+
+      /* Emergency Button (always visible) */
+      .emergency-btn {
+          position: fixed;
+          bottom: 25px;
+          right: 25px;
+          width: 70px;
+          height: 70px;
+          border-radius: 50%;
+          background-color: var(--danger);
+          color: white;
+          font-size: 16px;
+          font-weight: bold;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          box-shadow: 0 4px 15px rgba(220, 53, 69, 0.5);
+          animation: pulse 2s infinite;
+          z-index: 1000;
+      }
+
+
+      @keyframes pulse {
+          0% {
+              transform: scale(1);
+              box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+          }
+          70% {
+              transform: scale(1.05);
+              box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+          }
+          100% {
+              transform: scale(1);
+              box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+          }
+      }
+
+
+      /* Bottom Navigation */
+      .bottom-nav {
+          background: white;
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          padding: 10px 0;
+          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+          position: sticky;
+          bottom: 0;
+          z-index: 99;
+      }
+
+
+      .nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-decoration: none;
+          color: #777;
+          font-size: 10px;
+      }
+
+
+      .nav-item i {
+          font-size: 20px;
+          margin-bottom: 2px;
+      }
+
+
+      .nav-item.active {
+          color: var(--primary);
+      }
+
+
+      /* Hide scrollbar but allow scrolling */
+      ::-webkit-scrollbar {
+          width: 0px;
+          background: transparent;
+      }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+      <div class="logo-container">
+          <svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <!-- Outer Circle -->
+              <circle cx="100" cy="100" r="95" fill="#ffffff" stroke="#4169e1" stroke-width="5"/>
+            
+              <!-- Shield Background -->
+              <path d="M100,25 C100,25 70,15 40,25 C40,25 40,50 40,90 C40,130 80,160 100,175 C120,160 160,130 160,90 C160,50 160,25 160,25 C130,15 100,25 100,25 Z" fill="#4169e1"/>
+            
+              <!-- Location Pin in Shield -->
+              <circle cx="100" cy="80" r="12" fill="#ffffff"/>
+              <path d="M100,92 C100,92 75,115 100,140 C125,115 100,92 100,92 Z" fill="#ffffff"/>
+            
+              <!-- Connecting Lines/WiFi Symbol -->
+              <path d="M60,65 A65,65 0 0,1 140,65" stroke="#ffffff" stroke-width="6" fill="transparent"/>
+              <path d="M70,50 A50,50 0 0,1 130,50" stroke="#ffffff" stroke-width="6" fill="transparent"/>
+              <path d="M80,35 A35,35 0 0,1 120,35" stroke="#ffffff" stroke-width="6" fill="transparent"/>
+          </svg>
+          <div class="logo-text">SafeConnect</div>
+      </div>
+      <div class="header-actions">
+          <button class="notification-btn">
+              <i class="fas fa-bell"></i>
+              <span class="notification-count">3</span>
+          </button>
+          <button class="profile-btn">
+              <i class="fas fa-user-circle"></i>
+          </button>
+      </div>
+  </div>
+
+
+  <!-- Main Content -->
+  <div class="container">
+      <h1 class="page-title">Resources</h1>
+
+
+      <!-- Resource Categories -->
+      <div class="resource-categories">
+          <button class="category-btn active">All</button>
+          <button class="category-btn">Emergency</button>
+          <button class="category-btn">Support Services</button>
+          <button class="category-btn">Legal Resources</button>
+          <button class="category-btn">Safety Tips</button>
+          <button class="category-btn">Self-Defense</button>
+          <button class="category-btn">Downloads</button>
+          <button class="category-btn">Community Forums</button>
+      </div>
+
+
+      <!-- Emergency Contacts Section -->
+      <div class="emergency-contacts">
+          <div class="emergency-title">
+              <i class="fas fa-phone-alt"></i> Emergency Contact Numbers
+          </div>
+          <ul class="emergency-list">
+              <li class="emergency-item">
+                  <div class="emergency-info">
+                      <div class="emergency-name">National Emergency</div>
+                      <div class="emergency-number">112</div>
+                  </div>
+                  <button class="call-btn">
+                      <i class="fas fa-phone-alt"></i>
+                  </button>
+              </li>
+              <li class="emergency-item">
+                  <div class="emergency-info">
+                      <div class="emergency-name">Women's Helpline</div>
+                      <div class="emergency-number">1091</div>
+                  </div>
+                  <button class="call-btn">
+                      <i class="fas fa-phone-alt"></i>
+                  </button>
+              </li>
+              <li class="emergency-item">
+                  <div class="emergency-info">
+                      <div class="emergency-name">Police</div>
+                      <div class="emergency-number">100</div>
+                  </div>
+                  <button class="call-btn">
+                      <i class="fas fa-phone-alt"></i>
+                  </button>
+              </li>
+              <li class="emergency-item">
+                  <div class="emergency-info">
+                      <div class="emergency-name">Ambulance</div>
+                      <div class="emergency-number">108</div>
+                  </div>
+                  <button class="call-btn">
+                      <i class="fas fa-phone-alt"></i>
+                  </button>
+              </li>
+          </ul>
+      </div>
+
+
+      <!-- Women's Support Services -->
+      <div class="resource-section">
+          <div class="section-header">
+              <div class="section-title">Women's Support Services</div>
+              <a href="#" class="see-all">See All</a>
+          </div>
+          <div class="resource-cards">
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">National Commission for Women</div>
+                      <div class="resource-card-desc">Official government body dedicated to advising the government on all policy matters affecting women.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Contact</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">One Stop Crisis Center</div>
+                      <div class="resource-card-desc">Centers that provide integrated support and assistance to women affected by violence.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Find Nearest</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">Women's Shelter Homes</div>
+                      <div class="resource-card-desc">Safe accommodation for women facing domestic violence or unsafe situations.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Locate</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+      <!-- Legal Resources Section -->
+      <div class="resource-section">
+          <div class="section-header">
+              <div class="section-title">Legal Resources & Rights</div>
+              <a href="#" class="see-all">See All</a>
+          </div>
+          <div class="resource-cards">
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">Women's Rights Handbook</div>
+                      <div class="resource-card-desc">Comprehensive guide to legal rights and protections available to women under Indian law.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Read</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">Free Legal Aid Services</div>
+                      <div class="resource-card-desc">Information about accessing free legal assistance and representation.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Learn More</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">Filing a Police Complaint</div>
+                      <div class="resource-card-desc">Step-by-step guide to filing and following up on police complaints.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Read Guide</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+      <!-- Safety Tips Section -->
+      <div class="resource-section">
+          <div class="section-header">
+              <div class="section-title">Safety Tips & Educational Content</div>
+              <a href="#" class="see-all">See All</a>
+          </div>
+          <div class="resource-cards">
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">Travel Safety Guidelines</div>
+                      <div class="resource-card-desc">Best practices for staying safe while using public transportation and traveling alone.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Read</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">Digital Safety & Privacy</div>
+                      <div class="resource-card-desc">Tutorials on protecting your online presence and preventing digital harassment.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Learn More</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+              <div class="resource-card">
+                  <div class="resource-card-content">
+                      <div class="resource-card-title">Recognizing Warning Signs</div>
+                      <div class="resource-card-desc">Educational content on identifying potentially dangerous situations and individuals.</div>
+                      <div class="resource-card-action">
+                          <button class="resource-btn">Read Guide</button>
+                          <button class="resource-save">
+                              <i class="far fa-bookmark"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+      <!-- Self-Defense Tutorial Videos -->
+      <div class="resource-section">
+          <div class="section-header">
+              <div class="section-title">Self-Defense Tutorials</div>
+              <a href="#" class="see-all">See All</a>
+          </div>
+          <div class="resource-cards">
+              <div class="video-card">
+                  <div class="video-thumbnail">
+                      <img src="/api/placeholder/300/160" alt="Basic Self-Defense Moves">
+                      <div class="video-play-btn">
+                          <i class="fas fa-play"></i>
+                      </div>
+                  </div>
+                  <div class="resource-card-content">
+                      <div class="video-title">Basic Self-Defense Moves</div>
+                      <div class="video-duration">10:25 mins</div>
+                  </div>
+              </div>
+              <div class="video-card">
+                  <div class="video-thumbnail">
+                      <img src="/api/placeholder/300/160" alt="Escape from Grabs">
+                      <div class="video-play-btn">
+                          <i class="fas fa-play"></i>
+                      </div>
+                  </div>
+                  <div class="resource-card-content">
+                      <div class="video-title">Escape from Grabs</div>
+                      <div class="video-duration">8:15 mins</div>
+                  </div>
+              </div>
+              <div class="video-card">
+                  <div class="video-thumbnail">
+                      <img src="/api/placeholder/300/160" alt="Using Everyday Items for Defense">
+                      <div class="video-play-btn">
+                          <i class="fas fa-play"></i>
+                      </div>
+                  </div>
+                  <div class="resource-card-content">
+                      <div class="video-title">Using Everyday Items for Defense</div>
+                      <div class="video-duration">12:40 mins</div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+      <!-- Request Callback Section -->
+      <div class="request-callback">
+          <div class="callback-title">Request a Call Back from Support Services</div>
+          <form class="callback-form">
+              <div class="form-group">
+                  <label class="form-label">Your Name</label>
+                  <input type="text" class="form-input" placeholder="Enter your name">
+              </div>
+              <div class="form-group">
+                  <label class="form-label">Phone Number</label>
+                  <input type="tel" class="form-input" placeholder="Enter your phone number">
+              </div>
+              <div class="form-group">
+                  <label class="form-label">Support Type Needed</label>
+                  <select class="form-select">
+                      <option value="">Select support type</option>
+                      <option value="counseling">Counseling</option>
+                      <option value="legal">Legal Assistance</option>
+                      <option value="shelter">Shelter Information</option>
+                      <option value="medical">Medical Support</option>
+                      <option value="other">Other</option>
+                  </select>
+              </div>
+              <div class="form-group">
+                  <label class="form-label">Preferred Time for Call</label>
+                  <select class="form-select">
+                      <option value="">Select time</option>
+                      <option value="morning">Morning (9AM - 12PM)</option>
+                      <option value="afternoon">Afternoon (12PM - 5PM)</option>
+                      <option value="evening">Evening (5PM - 8PM)</option>
+                  </select>
+              </div>
+              <button type="submit" class="request-btn">Request Call Back</button>
+          </form>
+      </div>
+
+
+      <!-- Downloadable Resources -->
+      <div class="resource-section">
+          <div class="section-header">
+              <div class="section-title">Downloadable Resources</div>
+              <a href="#" class="see-all">See All</a>
+          </div>
+          <div class="download-card">
+
+
+
+
+
