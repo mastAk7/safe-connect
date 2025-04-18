@@ -1,0 +1,1391 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>SafeConnect - Profile & Settings</title>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <style>
+     :root {
+         --primary: #4169e1;
+         --primary-dark: #2a4cba;
+         --secondary: #ff6b6b;
+         --light: #f8f9fa;
+         --dark: #343a40;
+         --success: #28a745;
+         --danger: #dc3545;
+         --warning: #ffc107;
+         --info: #17a2b8;
+     }
+
+
+     * {
+         margin: 0;
+         padding: 0;
+         box-sizing: border-box;
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+     }
+
+
+     body {
+         background: #f5f7fa;
+         color: #343a40;
+         height: 100vh;
+         display: flex;
+         flex-direction: column;
+     }
+
+
+     /* Header Styles */
+     .header {
+         background: white;
+         padding: 15px 20px;
+         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         position: sticky;
+         top: 0;
+         z-index: 100;
+     }
+
+
+     .logo-container {
+         display: flex;
+         align-items: center;
+     }
+
+
+     .logo {
+         width: 40px;
+         height: 40px;
+         margin-right: 10px;
+     }
+
+
+     .logo-text {
+         font-size: 20px;
+         font-weight: 600;
+         color: var(--primary);
+     }
+
+
+     .header-actions {
+         display: flex;
+         align-items: center;
+     }
+
+
+     .notification-btn, .profile-btn {
+         background: transparent;
+         border: none;
+         font-size: 20px;
+         color: var(--primary);
+         margin-left: 15px;
+         cursor: pointer;
+         position: relative;
+     }
+
+
+     .notification-count {
+         position: absolute;
+         top: -5px;
+         right: -5px;
+         background: var(--danger);
+         color: white;
+         font-size: 10px;
+         width: 18px;
+         height: 18px;
+         border-radius: 50%;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+     }
+
+
+     /* Main Content Styles */
+     .container {
+         flex: 1;
+         padding: 20px;
+         overflow-y: auto;
+     }
+
+
+     .page-title {
+         font-size: 24px;
+         font-weight: 600;
+         color: var(--primary);
+         margin-bottom: 20px;
+     }
+
+
+     /* User Profile Section */
+     .profile-header {
+         background: white;
+         border-radius: 10px;
+         padding: 20px;
+         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+         display: flex;
+         align-items: center;
+         margin-bottom: 20px;
+     }
+
+
+     .profile-photo {
+         width: 80px;
+         height: 80px;
+         border-radius: 50%;
+         background: var(--primary);
+         color: white;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         font-size: 32px;
+         margin-right: 20px;
+     }
+
+
+     .profile-info {
+         flex: 1;
+     }
+
+
+     .profile-name {
+         font-size: 20px;
+         font-weight: 600;
+         margin-bottom: 5px;
+     }
+
+
+     .profile-email {
+         font-size: 14px;
+         color: #666;
+         margin-bottom: 5px;
+     }
+
+
+     .verification-status {
+         display: flex;
+         align-items: center;
+         font-size: 14px;
+     }
+
+
+     .verification-badge {
+         background: var(--success);
+         color: white;
+         padding: 4px 8px;
+         border-radius: 4px;
+         display: flex;
+         align-items: center;
+         margin-right: 10px;
+     }
+
+
+     .verification-badge i {
+         margin-right: 5px;
+     }
+
+
+     .verification-badge.pending {
+         background: var(--warning);
+     }
+
+
+     .edit-profile-btn {
+         background: var(--primary);
+         color: white;
+         border: none;
+         border-radius: 5px;
+         padding: 8px 15px;
+         font-size: 14px;
+         cursor: pointer;
+         display: flex;
+         align-items: center;
+     }
+
+
+     .edit-profile-btn i {
+         margin-right: 5px;
+     }
+
+
+     /* Settings Categories */
+     .settings-categories {
+         display: flex;
+         overflow-x: auto;
+         gap: 15px;
+         padding-bottom: 10px;
+         margin-bottom: 20px;
+     }
+
+
+     .category-btn {
+         background-color: white;
+         border: 1px solid var(--primary);
+         border-radius: 50px;
+         padding: 8px 16px;
+         font-size: 14px;
+         color: var(--primary);
+         white-space: nowrap;
+         cursor: pointer;
+         transition: all 0.3s ease;
+     }
+
+
+     .category-btn.active {
+         background-color: var(--primary);
+         color: white;
+     }
+
+
+     .category-btn:hover:not(.active) {
+         background-color: rgba(65, 105, 225, 0.1);
+     }
+
+
+     /* Settings Sections */
+     .settings-section {
+         background: white;
+         border-radius: 10px;
+         padding: 20px;
+         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+         margin-bottom: 20px;
+     }
+
+
+     .settings-title {
+         font-size: 18px;
+         font-weight: 600;
+         color: var(--primary);
+         margin-bottom: 15px;
+         display: flex;
+         align-items: center;
+     }
+
+
+     .settings-title i {
+         margin-right: 10px;
+     }
+
+
+     /* Emergency Contacts */
+     .emergency-contacts-list {
+         margin-bottom: 15px;
+     }
+
+
+     .contact-item {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         padding: 10px 15px;
+         border-bottom: 1px solid #eee;
+     }
+
+
+     .contact-info {
+         display: flex;
+         align-items: center;
+     }
+
+
+     .contact-avatar {
+         width: 40px;
+         height: 40px;
+         border-radius: 50%;
+         background: var(--light);
+         color: var(--dark);
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         font-size: 18px;
+         margin-right: 10px;
+     }
+
+
+     .contact-details {
+         flex: 1;
+     }
+
+
+     .contact-name {
+         font-weight: 600;
+         margin-bottom: 3px;
+     }
+
+
+     .contact-number {
+         font-size: 12px;
+         color: #666;
+     }
+
+
+     .contact-actions {
+         display: flex;
+     }
+
+
+     .contact-action-btn {
+         background: transparent;
+         border: none;
+         cursor: pointer;
+         color: #666;
+         font-size: 16px;
+         margin-left: 10px;
+     }
+
+
+     .contact-action-btn.edit {
+         color: var(--primary);
+     }
+
+
+     .contact-action-btn.delete {
+         color: var(--danger);
+     }
+
+
+     .add-contact-btn {
+         background: var(--primary);
+         color: white;
+         border: none;
+         border-radius: 5px;
+         padding: 10px 15px;
+         font-size: 14px;
+         cursor: pointer;
+         display: flex;
+         align-items: center;
+         width: 100%;
+         justify-content: center;
+     }
+
+
+     .add-contact-btn i {
+         margin-right: 5px;
+     }
+
+
+     /* Toggle Switch */
+     .toggle-container {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         padding: 12px 0;
+         border-bottom: 1px solid #eee;
+     }
+
+
+     .toggle-label {
+         font-size: 14px;
+     }
+
+
+     .toggle-description {
+         font-size: 12px;
+         color: #666;
+         margin-top: 3px;
+     }
+
+
+     .toggle-switch {
+         position: relative;
+         display: inline-block;
+         width: 50px;
+         height: 24px;
+     }
+
+
+     .toggle-switch input {
+         opacity: 0;
+         width: 0;
+         height: 0;
+     }
+
+
+     .switch-slider {
+         position: absolute;
+         cursor: pointer;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom: 0;
+         background-color: #ccc;
+         transition: .4s;
+         border-radius: 34px;
+     }
+
+
+     .switch-slider:before {
+         position: absolute;
+         content: "";
+         height: 16px;
+         width: 16px;
+         left: 4px;
+         bottom: 4px;
+         background-color: white;
+         transition: .4s;
+         border-radius: 50%;
+     }
+
+
+     input:checked + .switch-slider {
+         background-color: var(--primary);
+     }
+
+
+     input:checked + .switch-slider:before {
+         transform: translateX(26px);
+     }
+
+
+     /* Slider Control */
+     .slider-container {
+         padding: 12px 0;
+         border-bottom: 1px solid #eee;
+     }
+
+
+     .slider-header {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         margin-bottom: 10px;
+     }
+
+
+     .slider-label {
+         font-size: 14px;
+     }
+
+
+     .slider-value {
+         font-size: 14px;
+         color: var(--primary);
+         font-weight: 600;
+     }
+
+
+     .slider-control {
+         width: 100%;
+         height: 8px;
+         border-radius: 5px;
+         background: #ddd;
+         outline: none;
+     }
+
+
+     .slider-control::-webkit-slider-thumb {
+         -webkit-appearance: none;
+         appearance: none;
+         width: 20px;
+         height: 20px;
+         border-radius: 50%;
+         background: var(--primary);
+         cursor: pointer;
+     }
+
+
+     /* Security Section */
+     .security-option {
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         padding: 15px 0;
+         border-bottom: 1px solid #eee;
+     }
+
+
+     .security-option:last-child {
+         border-bottom: none;
+     }
+
+
+     .security-option-info {
+         flex: 1;
+     }
+
+
+     .security-option-title {
+         font-weight: 600;
+         margin-bottom: 5px;
+     }
+
+
+     .security-option-desc {
+         font-size: 12px;
+         color: #666;
+     }
+
+
+     .security-btn {
+         background: var(--light);
+         border: 1px solid #ddd;
+         border-radius: 5px;
+         padding: 8px 12px;
+         font-size: 14px;
+         cursor: pointer;
+     }
+
+
+     /* Appearance Section */
+     .theme-options {
+         display: flex;
+         gap: 10px;
+         margin-bottom: 20px;
+     }
+
+
+     .theme-option {
+         border: 2px solid transparent;
+         border-radius: 8px;
+         overflow: hidden;
+         cursor: pointer;
+         width: 70px;
+         transition: all 0.3s ease;
+     }
+
+
+     .theme-option.active {
+         border-color: var(--primary);
+     }
+
+
+     .theme-preview {
+         height: 70px;
+         display: flex;
+         flex-direction: column;
+     }
+
+
+     .theme-header {
+         height: 20px;
+         background: var(--primary);
+     }
+
+
+     .theme-body {
+         flex: 1;
+         background: white;
+     }
+
+
+     .theme-name {
+         text-align: center;
+         font-size: 12px;
+         padding: 5px 0;
+     }
+
+
+     .dark-mode .theme-header {
+         background: #2c3e50;
+     }
+
+
+     .dark-mode .theme-body {
+         background: #34495e;
+     }
+
+
+     .purple-mode .theme-header {
+         background: #8e44ad;
+     }
+
+
+     .teal-mode .theme-header {
+         background: #16a085;
+     }
+
+
+     /* Font Size Control */
+     .font-size-controls {
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+         margin-top: 10px;
+     }
+
+
+     .font-size-btn {
+         background: var(--light);
+         border: 1px solid #ddd;
+         border-radius: 5px;
+         width: 40px;
+         height: 40px;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         font-size: 18px;
+         cursor: pointer;
+     }
+
+
+     .font-size-text {
+         font-size: 16px;
+         font-weight: 600;
+     }
+
+
+     .font-size-sample {
+         border: 1px solid #ddd;
+         border-radius: 5px;
+         padding: 10px;
+         margin-top: 10px;
+     }
+
+
+     /* Feedback Section */
+     .feedback-form {
+         display: flex;
+         flex-direction: column;
+         gap: 15px;
+     }
+
+
+     .form-group {
+         display: flex;
+         flex-direction: column;
+     }
+
+
+     .form-label {
+         font-size: 14px;
+         margin-bottom: 5px;
+         color: #555;
+     }
+
+
+     .form-input {
+         padding: 12px 15px;
+         border: 1px solid #ddd;
+         border-radius: 8px;
+         font-size: 14px;
+     }
+
+
+     .form-input:focus {
+         outline: none;
+         border-color: var(--primary);
+     }
+
+
+     .form-textarea {
+         padding: 12px 15px;
+         border: 1px solid #ddd;
+         border-radius: 8px;
+         font-size: 14px;
+         min-height: 100px;
+         resize: vertical;
+     }
+
+
+     .form-textarea:focus {
+         outline: none;
+         border-color: var(--primary);
+     }
+
+
+     .form-select {
+         padding: 12px 15px;
+         border: 1px solid #ddd;
+         border-radius: 8px;
+         font-size: 14px;
+         background-color: white;
+     }
+
+
+     .submit-btn {
+         background-color: var(--primary);
+         color: white;
+         border: none;
+         border-radius: 8px;
+         padding: 12px 15px;
+         font-size: 16px;
+         font-weight: 600;
+         cursor: pointer;
+         transition: background-color 0.3s ease;
+     }
+
+
+     .submit-btn:hover {
+         background-color: var(--primary-dark);
+     }
+
+
+     /* Bottom Navigation */
+     .bottom-nav {
+         background: white;
+         display: grid;
+         grid-template-columns: repeat(5, 1fr);
+         padding: 10px 0;
+         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+         position: sticky;
+         bottom: 0;
+         z-index: 99;
+     }
+
+
+     .nav-item {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         text-decoration: none;
+         color: #777;
+         font-size: 10px;
+     }
+
+
+     .nav-item i {
+         font-size: 20px;
+         margin-bottom: 2px;
+     }
+
+
+     .nav-item.active {
+         color: var(--primary);
+     }
+
+
+     /* Emergency Button */
+     .emergency-btn {
+         position: fixed;
+         bottom: 25px;
+         right: 25px;
+         width: 70px;
+         height: 70px;
+         border-radius: 50%;
+         background-color: var(--danger);
+         color: white;
+         font-size: 16px;
+         font-weight: bold;
+         border: none;
+         cursor: pointer;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         box-shadow: 0 4px 15px rgba(220, 53, 69, 0.5);
+         animation: pulse 2s infinite;
+         z-index: 1000;
+     }
+
+
+     @keyframes pulse {
+         0% {
+             transform: scale(1);
+             box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+         }
+         70% {
+             transform: scale(1.05);
+             box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+         }
+         100% {
+             transform: scale(1);
+             box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+         }
+     }
+
+
+     /* Hide scrollbar but allow scrolling */
+     ::-webkit-scrollbar {
+         width: 0px;
+         background: transparent;
+     }
+ </style>
+</head>
+
+<div class="container">
+    <h1 class="page-title">Profile & Settings</h1>
+
+    <!-- User Profile Header -->
+    <div class="profile-header">
+        <div class="profile-photo">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="profile-info">
+            <div class="profile-name"><%= user.name %></div>
+            <div class="profile-email"><%= user.email ? user.email : 'No email added' %></div>
+            <div class="profile-phone"><%= user.phone ? user.phone : 'No phone added' %></div>
+            <div class="verification-status">
+                <div class="verification-badge">
+                    <i class="fas fa-check-circle"></i> Verified
+                </div>
+                <span>Member since <%= new Date(user._id.getTimestamp()).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %></span>
+            </div>
+        </div>
+        <button class="edit-profile-btn" id="edit-profile-btn">
+            <i class="fas fa-pencil-alt"></i> Edit
+        </button>
+    </div>
+
+    <!-- Settings Categories -->
+    <div class="settings-categories">
+        <button class="category-btn active" data-category="all">All</button>
+        <button class="category-btn" data-category="account">Account</button>
+        <button class="category-btn" data-category="emergency">Emergency Contacts</button>
+        <button class="category-btn" data-category="privacy">Privacy</button>
+        <button class="category-btn" data-category="notifications">Notifications</button>
+        <button class="category-btn" data-category="location">Location</button>
+        <button class="category-btn" data-category="volunteer">Volunteer</button>
+        <button class="category-btn" data-category="appearance">Appearance</button>
+        <button class="category-btn" data-category="security">Security</button>
+        <button class="category-btn" data-category="feedback">Feedback</button>
+    </div>
+
+    <!-- User Verification Status -->
+    <div class="settings-section" data-section="account security">
+        <div class="settings-title">
+            <i class="fas fa-user-check"></i> User Verification Status
+        </div>
+        <div class="security-option">
+            <div class="security-option-info">
+                <div class="security-option-title">ID Verification</div>
+                <div class="security-option-desc">Your identity has been verified with government ID</div>
+            </div>
+            <div class="verification-badge">
+                <i class="fas fa-check-circle"></i> Verified
+            </div>
+        </div>
+        <div class="security-option">
+            <div class="security-option-info">
+                <div class="security-option-title">Phone Number Verification</div>
+                <div class="security-option-desc">Your phone number has been verified</div>
+            </div>
+            <div class="verification-badge">
+                <i class="fas fa-<%= user.phone ? 'check' : 'times' %>-circle"></i> <%= user.phone ? 'Verified' : 'Not Verified' %>
+            </div>
+        </div>
+        <div class="security-option">
+            <div class="security-option-info">
+                <div class="security-option-title">Email Verification</div>
+                <div class="security-option-desc">Your email address has been verified</div>
+            </div>
+            <div class="verification-badge">
+                <i class="fas fa-<%= user.email ? 'check' : 'times' %>-circle"></i> <%= user.email ? 'Verified' : 'Not Verified' %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Contact Management -->
+    <div class="settings-section" data-section="emergency">
+        <div class="settings-title">
+            <i class="fas fa-phone-alt"></i> Emergency Contact Management
+        </div>
+        <div class="emergency-contacts-list" id="emergency-contacts-list">
+            <!-- This will be populated via JavaScript -->
+        </div>
+        <button class="add-contact-btn" id="add-contact-btn">
+            <i class="fas fa-plus"></i> Add Emergency Contact
+        </button>
+    </div>
+
+    <!-- Privacy Controls and Data Sharing -->
+    <div class="settings-section" data-section="privacy">
+        <div class="settings-title">
+            <i class="fas fa-shield-alt"></i> Privacy Controls & Data Sharing
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Share Location with Emergency Contacts</div>
+                <div class="toggle-description">Your location will be shared with emergency contacts when you trigger an alert</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked id="share-location-emergency">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Share Location with Support Services</div>
+                <div class="toggle-description">Your location will be shared with support services when you request help</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked id="share-location-support">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Anonymous Usage Data</div>
+                <div class="toggle-description">Share anonymous usage data to improve the app</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked id="share-usage-data">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Public Profile Visibility</div>
+                <div class="toggle-description">Allow other SafeConnect users to see your profile</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="public-profile">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Notification Preferences -->
+    <div class="settings-section" data-section="notifications">
+        <div class="settings-title">
+            <i class="fas fa-bell"></i> Notification Preferences
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Safety Alerts</div>
+                <div class="toggle-description">Receive notifications about incidents in your area</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked id="safety-alerts">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Service Updates</div>
+                <div class="toggle-description">Receive notifications about new services and features</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked id="service-updates">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Community Messages</div>
+                <div class="toggle-description">Receive notifications about community events and messages</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="community-messages">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Educational Content</div>
+                <div class="toggle-description">Receive notifications about new educational resources</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="educational-content">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Location Accuracy Settings -->
+    <div class="settings-section" data-section="location">
+        <div class="settings-title">
+            <i class="fas fa-map-marker-alt"></i> Location Accuracy Settings
+        </div>
+        <div class="slider-container">
+            <div class="slider-header">
+                <div class="slider-label">Location Accuracy</div>
+                <div class="slider-value" id="accuracy-value">High</div>
+            </div>
+            <input type="range" min="1" max="3" value="3" class="slider-control" id="accuracy-slider">
+            <div class="toggle-description">Higher accuracy uses more battery but provides more precise location data</div>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Background Location Tracking</div>
+                <div class="toggle-description">Allow app to track location even when not in use</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked id="background-location">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-container">
+            <div>
+                <div class="toggle-label">Safe Route Recommendations</div>
+                <div class="toggle-description">Receive safer route suggestions based on your location</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" checked id="safe-routes">
+                <span class="switch-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Volunteer Application -->
+    <div class="settings-section" data-section="volunteer">
+        <div class="settings-title">
+            <i class="fas fa-hands-helping"></i> Volunteer Application
+        </div>
+        <% if (user.role === 'volunteer') { %>
+            <div class="security-option">
+                <div class="security-option-info">
+                    <div class="security-option-title">Volunteer Status</div>
+                    <div class="security-option-desc">You are currently a volunteer!</div>
+                </div>
+                <div class="verification-badge">
+                    <i class="fas fa-check-circle"></i> Active
+                </div>
+            </div>
+            <a href="/volunteer/sos" class="security-btn view-dashboard-btn">
+                View Volunteer Dashboard
+            </a>
+        <% } else { %>
+            <div class="security-option">
+                <div class="security-option-info">
+                    <div class="security-option-title">Become a SafeConnect Volunteer</div>
+                    <div class="security-option-desc">Help others in your community by volunteering your time and skills</div>
+                </div>
+                <a href="/become-volunteer" class="security-btn">Apply Now</a>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Logout Section -->
+    <div class="settings-section" data-section="account">
+        <div class="settings-title">
+            <i class="fas fa-sign-out-alt"></i> Account Actions
+        </div>
+        <div class="security-option">
+            <div class="security-option-info">
+                <div class="security-option-title">Log Out</div>
+                <div class="security-option-desc">End your current session</div>
+            </div>
+            <a href="/logout" class="security-btn danger">Log Out</a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Get current user's location
+    let userLocation = null;
+    
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize location data
+        fetchUserProfile();
+        
+        // Get all settings category buttons
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const settingsSections = document.querySelectorAll('.settings-section');
+        
+        // Add click event listeners to category buttons
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const category = this.getAttribute('data-category');
+                
+                // Show/hide sections based on selected category
+                settingsSections.forEach(section => {
+                    const sectionCategories = section.getAttribute('data-section');
+                    
+                    if (category === 'all' || sectionCategories.includes(category)) {
+                        section.style.display = 'block';
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Initialize location slider
+        const accuracySlider = document.getElementById('accuracy-slider');
+        const accuracyValue = document.getElementById('accuracy-value');
+        
+        if (accuracySlider) {
+            accuracySlider.addEventListener('input', function() {
+                const value = this.value;
+                let accuracyText = 'Low';
+                
+                if (value == 2) {
+                    accuracyText = 'Medium';
+                } else if (value == 3) {
+                    accuracyText = 'High';
+                }
+                
+                accuracyValue.textContent = accuracyText;
+            });
+        }
+        
+        // Handle profile edit button
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        const editProfileModal = document.getElementById('edit-profile-modal');
+        const closeButtons = document.querySelectorAll('.close, .cancel-btn');
+        
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', function() {
+                editProfileModal.style.display = 'block';
+            });
+        }
+        
+        // Handle add contact button
+        const addContactBtn = document.getElementById('add-contact-btn');
+        const addContactModal = document.getElementById('add-contact-modal');
+        
+        if (addContactBtn) {
+            addContactBtn.addEventListener('click', function() {
+                addContactModal.style.display = 'block';
+            });
+        }
+        
+        // Close modals when clicking close button or outside the modal
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                editProfileModal.style.display = 'none';
+                addContactModal.style.display = 'none';
+            });
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target === editProfileModal) {
+                editProfileModal.style.display = 'none';
+            }
+            if (event.target === addContactModal) {
+                addContactModal.style.display = 'none';
+            }
+        });
+        
+        // Form submissions
+        const editProfileForm = document.getElementById('edit-profile-form');
+        if (editProfileForm) {
+            editProfileForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                updateUserProfile();
+            });
+        }
+        
+        const addContactForm = document.getElementById('add-contact-form');
+        if (addContactForm) {
+            addContactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addEmergencyContact();
+            });
+        }
+        
+        // Get current location for accurate settings
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    
+                    // Update user location in database
+                    updateUserLocation(userLocation);
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                }
+            );
+        }
+        
+        // Load emergency contacts
+        loadEmergencyContacts();
+    });
+    
+    // Fetch user profile data
+    function fetchUserProfile() {
+        fetch('/api/user/profile')
+            .then(response => response.json())
+            .then(data => {
+                if (data.location) {
+                    userLocation = data.location;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user profile:', error);
+            });
+    }
+    
+    // Update user profile
+    function updateUserProfile() {
+        const name = document.getElementById('edit-name').value;
+        const email = document.getElementById('edit-email').value;
+        const phone = document.getElementById('edit-phone').value;
+        
+        fetch('/api/user/profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, email, phone })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('edit-profile-modal').style.display = 'none';
+                // Reload page to show updated profile
+                window.location.reload();
+            } else {
+                alert('Failed to update profile: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error updating profile:', error);
+            alert('An error occurred while updating your profile');
+        });
+    }
+    
+    // Update user location
+    function updateUserLocation(location) {
+        fetch('/api/user/location', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(location)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Location updated:', data.success);
+        })
+        .catch(error => {
+            console.error('Error updating location:', error);
+        });
+    }
+    
+    // Load emergency contacts
+    function loadEmergencyContacts() {
+        const contactsList = document.getElementById('emergency-contacts-list');
+        
+        // Sample contacts - will be replaced with actual API call
+        const sampleContacts = [
+            { id: 1, name: 'John Doe', phone: '+1 (555) 123-4567', relationship: 'family' },
+            { id: 2, name: 'Mary Smith', phone: '+1 (555) 234-5678', relationship: 'friend' }
+        ];
+        
+        // In a real implementation, you would fetch from API:
+        /*
+        fetch('/api/emergency-contacts')
+            .then(response => response.json())
+            .then(contacts => {
+                renderContacts(contacts);
+            })
+        */
+        
+        // For now, use sample data
+        renderContacts(sampleContacts);
+        
+        function renderContacts(contacts) {
+            contactsList.innerHTML = '';
+            
+            if (contacts.length === 0) {
+                contactsList.innerHTML = '<div class="no-contacts">No emergency contacts added</div>';
+                return;
+            }
+            
+            contacts.forEach(contact => {
+                const contactInitials = contact.name.split(' ')
+                    .map(name => name.charAt(0))
+                    .join('')
+                    .toUpperCase();
+                
+                const contactEl = document.createElement('div');
+                contactEl.className = 'contact-item';
+                contactEl.innerHTML = `
+                    <div class="contact-info">
+                        <div class="contact-avatar">${contactInitials}</div>
+                        <div class="contact-details">
+                            <div class="contact-name">${contact.name}</div>
+                            <div class="contact-number">${contact.phone}</div>
+                        </div>
+                    </div>
+                    <div class="contact-actions">
+                        <button class="contact-action-btn edit" data-id="${contact.id}">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="contact-action-btn delete" data-id="${contact.id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+                
+                contactsList.appendChild(contactEl);
+            });
+            
+            // Add event listeners for edit and delete buttons
+            document.querySelectorAll('.contact-action-btn.edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = this.getAttribute('data-id');
+                    editContact(contactId);
+                });
+            });
+            
+            document.querySelectorAll('.contact-action-btn.delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const contactId = this.getAttribute('data-id');
+                    deleteContact(contactId);
+                });
+            });
+        }
+    }
+    
+    // Add a new emergency contact
+    function addEmergencyContact() {
+        const name = document.getElementById('contact-name').value;
+        const phone = document.getElementById('contact-phone').value;
+        const relationship = document.getElementById('contact-relationship').value;
+        
+        // In a real implementation, you would call an API endpoint:
+        /*
+        fetch('/api/emergency-contacts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name, phone, relationship })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('add-contact-modal').style.display = 'none';
+                loadEmergencyContacts(); // Reload contacts
+            } else {
+                alert('Failed to add contact: ' + data.message);
+            }
+        })
+        */
+        
+        // For now, just close the modal and show an alert
+        document.getElementById('add-contact-modal').style.display = 'none';
+        alert(`Contact would be added: ${name}, ${phone}, ${relationship}`);
+        
+        // Reset form
+        document.getElementById('add-contact-form').reset();
+    }
+    
+    // Edit emergency contact
+    function editContact(contactId) {
+        // In a real implementation, you would:
+        // 1. Fetch the contact details
+        // 2. Open a modal to edit them
+        // 3. Submit the changes
+        alert(`Edit contact with ID: ${contactId}`);
+    }
+    
+    // Delete emergency contact
+    function deleteContact(contactId) {
+        if (confirm('Are you sure you want to delete this emergency contact?')) {
+            // In a real implementation, you would call an API endpoint:
+            /*
+            fetch(`/api/emergency-contacts/${contactId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadEmergencyContacts(); // Reload contacts
+                } else {
+                    alert('Failed to delete contact: ' + data.message);
+                }
+            })
+            */
+            
+            // For now, just show an alert
+            alert(`Contact with ID ${contactId} would be deleted`);
+        }
+    }
+</script>

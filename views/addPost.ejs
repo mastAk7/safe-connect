@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Post</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f9fafb;
+        color: #1f2937;
+        padding: 20px;
+      }
+
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #4361ee;
+        padding: 20px;
+        color: white;
+        border-radius: 10px;
+        margin-bottom: 30px;
+      }
+
+      .navbar h2 {
+        margin-left: 10px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        color: #1f2937;
+        font-size: 28px;
+      }
+
+      .drafts {
+        color: #6b7280;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .tab-container {
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 20px;
+        display: flex;
+      }
+
+      .tab {
+        padding: 15px 20px;
+        cursor: pointer;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .tab.active {
+        color: #4361ee;
+        border-bottom: 2px solid #4361ee;
+      }
+
+      .title-input {
+        width: 100%;
+        padding: 15px;
+        background-color: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        color: #111827;
+        font-size: 16px;
+      }
+
+      .character-count {
+        text-align: right;
+        margin-bottom: 20px;
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .tags {
+        display: inline-block;
+        margin-bottom: 20px;
+        padding: 12px 20px;
+        background-color: #e0e7ff;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #3730a3;
+      }
+
+      .editor {
+        background-color: #f3f4f6;
+        border-radius: 5px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 1px solid #d1d5db;
+      }
+
+      .toolbar {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #d1d5db;
+        padding-bottom: 10px;
+      }
+
+      .tool {
+        margin-right: 15px;
+        cursor: pointer;
+        color: #6b7280;
+        font-size: 18px;
+      }
+
+      .body {
+        background-color: #ffffff;
+        width: 100%;
+        height: 150px;
+        padding: 10px;
+        border: none;
+        font-size: 14px;
+        color: #111827;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-start;
+        gap: 15px;
+      }
+
+      .action-button {
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: 500;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .save-draft {
+        background-color: transparent;
+        border: 1px solid #6b7280;
+        color: #6b7280;
+      }
+
+      .post-button {
+        background-color: #4361ee;
+        border: none;
+        color: white;
+      }
+
+      .emergency-btn {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: #dc3545;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.5);
+        animation: pulse 2s infinite;
+        z-index: 1000;
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+        70% {
+          transform: scale(1.05);
+          box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+      }
+      .logo-container {
+        display: flex;
+        align-items: center;
+      }
+
+      .logo {
+        width: 40px;
+        height: 40px;
+      }
+      .tag-select-container {
+        margin-bottom: 20px;
+      }
+
+      .tag-dropdown {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        background-color: #f3f4f6;
+        color: #1f2937;
+        font-size: 14px;
+      }
+
+      /* Add this to your existing styles */
+.tag-select-container {
+  margin-bottom: 20px;
+}
+
+.tag-dropdown {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  font-size: 14px;
+}
+/* Slider Styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(to right, #4361ee, #dc3545);
+  border-radius: 5px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 2px solid #4361ee;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 2px solid #4361ee;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+output {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* Location Section Styles */
+#location-section {
+  background-color: #f3f4f6;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid #d1d5db;
+}
+
+#location-section h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #1f2937;
+}
+
+#location-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#use-current-location {
+  background-color: #4361ee;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.location-search {
+  display: flex;
+  flex-grow: 1;
+}
+
+#location-search {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px 0 0 5px;
+  font-size: 14px;
+}
+
+#search-location {
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+#location-map {
+  width: 100%;
+  height: 300px;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+}
+
+#location-display {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e0e7ff;
+  border-radius: 5px;
+  color: #3730a3;
+  font-size: 14px;
+}
+
+/* File upload styling */
+input[type="file"] {
+  display: block;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed #d1d5db;
+  border-radius: 5px;
+  background-color: #f9fafb;
+}
+
+#image-preview {
+  padding: 10px;
+  background-color: #f3f4f6;
+  border-radius: 5px;
+  border: 1px solid #d1d5db;
+}
+
+#preview-img {
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group label {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  #location-controls {
+    flex-direction: column;
+  }
+  
+  #use-current-location {
+    width: 100%;
+  }
+  
+  .location-search {
+    width: 100%;
+  }
+  
+  #location-map {
+    height: 250px;
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 15px;
+  }
+  
+  .title-input {
+    padding: 12px;
+  }
+  
+  .toolbar {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .emergency-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 14px;
+  }
+}
+    </style>
+  </head>
+  <body>
+
+    <div class="header">
+      <h1>Create post</h1>
+    </div>
+
+    <div class="tab-container">
+      <div class="tab active">Text</div>
+    </div>
+
+    <input
+      type="text"
+      class="title-input"
+      placeholder="Title*"
+      maxlength="300"
+    />
+    <div class="character-count">0/300</div>
+
+    <div class="tag-select-container">
+      <label
+        for="tag-select"
+        style="font-weight: 500; display: block; margin-bottom: 8px"
+        >Select a tag:</label
+      >
+      <select id="tag-select" class="tag-dropdown">
+        <option disabled selected>Add a tag</option>
+        <option value="theft">Theft</option>
+        <option value="accident">Accident</option>
+        <option value="harassment">Harassment</option>
+        <option value="fire">Fire</option>
+        <option value="cybercrime">Cybercrime</option>
+        <option value="missing-person">Missing Person</option>
+        <option value="medical-emergency">Medical Emergency</option>
+        <option value="vandalism">Vandalism</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+        <label for="intensity">Intensity (0-100)</label>
+        <input type="range" id="intensity" name="intensity" min="0" max="100" value="50">
+        <output for="intensity">50</output>
+      </div>
+
+    <div class="editor">
+      <div class="toolbar">
+        <div class="tool">B</div>
+        <div class="tool">i</div>
+        <div class="tool"><i class="fa-regular fa-file"></i></div>
+      </div>
+      <textarea class="body" placeholder="Body text"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="image">Add Image:</label>
+        <input type="file" name="image" id="image" accept="image/*">
+        <div id="image-preview" style="display: none; margin-top: 10px;">
+          <img id="preview-img" src="#" alt="Preview" style="max-width: 300px;"/>
+        </div>
+      </div>
+
+    <div id="location-section" class="form-group">
+        <h3>Post Location</h3>
+        <div id="location-controls">
+          <button type="button" id="use-current-location">Use my current location</button>
+          <div class="location-search">
+            <input type="text" id="location-search" placeholder="Search for a location">
+            <button type="button" id="search-location">Search</button>
+          </div>
+        </div>
+        
+        <div id="location-map" style="height: 300px; margin-top: 10px;"></div>
+        
+        <div id="location-display" style="display: none; margin-top: 10px;">
+          <p>Selected location: <span id="selected-location"></span></p>
+        </div>
+        
+        <!-- Hidden fields for location data -->
+        <input type="hidden" id="post-lat" name="lat">
+        <input type="hidden" id="post-lng" name="lng">
+        <input type="hidden" id="post-address" name="address">
+      </div>
+
+    <div class="actions">
+      <button class="action-button save-draft">Save Draft</button>
+      <button class="action-button post-button">Post</button>
+    </div>
+
+    <button id="emergency-btn" class="emergency-btn">SOS</button>
+    <script>
+        // SOS button functionality
+        document.getElementById('emergency-btn').addEventListener('click', function() {
+          window.location.href = '/sos';
+        });
+      
+        // Character count for title
+        const titleInput = document.querySelector('.title-input');
+        const characterCount = document.querySelector('.character-count');
+      
+        titleInput.addEventListener('input', function() {
+          const currentLength = this.value.length;
+          characterCount.textContent = `${currentLength}/300`;
+        });
+      
+        // Handle form submission
+        document.querySelector('.post-button').addEventListener('click', function() {
+  const title = document.querySelector('.title-input').value;
+  const content = document.querySelector('.body').value;
+  const tag = document.getElementById('tag-select').value;
+  const intensity = document.getElementById('intensity').value;
+  const imageFile = document.getElementById('image').files[0];
+
+  if (!title || !content || tag === 'Add a tag') {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  // Create form data to submit
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('content', content);
+  formData.append('tag', tag);
+  formData.append('intensity', intensity);
+  
+  // Add image if selected
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+  
+  // Check if custom location has been selected
+  const customLat = document.getElementById('post-lat').value;
+  const customLng = document.getElementById('post-lng').value;
+  const customAddress = document.getElementById('post-address').value;
+  
+  if (customLat && customLng) {
+    // Use the custom location selected from map
+    formData.append('lat', customLat);
+    formData.append('lng', customLng);
+    if (customAddress) {
+      formData.append('address', customAddress);
+    }
+    
+    // Submit form with custom location
+    submitForm(formData);
+  } else {
+    // Fall back to current location if no custom location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        formData.append('lat', position.coords.latitude);
+        formData.append('lng', position.coords.longitude);
+        
+        // Submit the form data
+        submitForm(formData);
+      }, function(error) {
+        alert('Unable to get your location. Please try again or select a location on the map.');
+        console.error('Geolocation error:', error);
+      });
+    } else {
+      alert('Geolocation is not supported by this browser. Please select a location on the map.');
+    }
+  }
+});
+
+function submitForm(formData) {
+  fetch('/add/posts', {
+    method: 'POST',
+    body: formData
+  }).then(response => {
+    if (response.ok) {
+      window.location.href = '/indexFeed';
+    } else {
+      alert('Error creating post. Please try again.');
+    }
+  }).catch(error => {
+    console.error('Error:', error);
+    alert('Error creating post. Please try again.');
+  });
+}
+      </script>
+      <script>
+        document.getElementById('submit-post').addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Validate form fields
+          const title = document.querySelector('.title-input').value.trim();
+          const content = document.querySelector('.body').value.trim();
+          const tagSelect = document.getElementById('tag-select');
+          const tag = tagSelect.options[tagSelect.selectedIndex].value;
+          
+          if (!title) {
+            alert('Please enter a title for your post');
+            return;
+          }
+          
+          if (!content) {
+            alert('Please enter content for your post');
+            return;
+          }
+          
+          if (tag === 'Add a tag') {
+            alert('Please select a tag for your post');
+            return;
+          }
+          
+          // Create FormData object to handle file upload
+          const formData = new FormData();
+          formData.append('title', title);
+          formData.append('content', `${tag}: ${content}`);
+          formData.append('intensity', '70'); // You can adjust this value
+          
+          // Get coordinates from user's current location
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+              const lat = position.coords.latitude;
+              const lng = position.coords.longitude;
+              
+              formData.append('lat', lat);
+              formData.append('lng', lng);
+              
+              // Use Nominatim to get address based on coordinates
+              fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                  if (data.display_name) {
+                    formData.append('address', data.display_name);
+                  }
+                  
+                  // Submit the form
+                  submitForm(formData);
+                })
+                .catch(err => {
+                  console.error('Error getting address:', err);
+                  // Submit anyway without address
+                  submitForm(formData);
+                });
+            }, function(error) {
+              alert('Unable to get your location. Please try again or check your browser settings.');
+              console.error('Geolocation error:', error);
+            });
+          } else {
+            alert('Geolocation is not supported by this browser.');
+          }
+        });
+        
+        function submitForm(formData) {
+          // Send POST request to server
+          fetch('/add/posts', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => {
+            if (response.ok) {
+              window.location.href = '/indexFeed';
+            } else {
+              throw new Error('Server responded with an error');
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error creating post. Please try again.');
+          });
+        }
+      </script>
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const intensitySlider = document.getElementById('intensity');
+          if (intensitySlider) {
+            const intensityOutput = intensitySlider.nextElementSibling;
+            
+            intensitySlider.addEventListener('input', () => {
+              intensityOutput.textContent = intensitySlider.value;
+              // Change color based on intensity
+              const hue = (100 - intensitySlider.value) * 1.2; // 120 is green, 0 is red
+              intensityOutput.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+              intensityOutput.style.color = 'white';
+              intensityOutput.style.padding = '2px 6px';
+              intensityOutput.style.borderRadius = '4px';
+            });
+            
+            // Trigger the input event to set initial color
+            intensitySlider.dispatchEvent(new Event('input'));
+          }
+        });
+      </script>
+      <script>
+        // Image preview functionality
+const imageInput = document.getElementById('image');
+const imagePreview = document.getElementById('image-preview');
+const previewImg = document.getElementById('preview-img');
+
+if (imageInput) {
+  imageInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        imagePreview.style.display = 'block';
+      };
+      
+      reader.readAsDataURL(this.files[0]);
+    } else {
+      imagePreview.style.display = 'none';
+    }
+  });
+}
+      </script>
+      <script src="location-handler.js"></script>
+  </body>
+</html>

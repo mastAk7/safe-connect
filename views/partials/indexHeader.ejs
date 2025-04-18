@@ -7,6 +7,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
     <style>
       :root {
         --primary: #4169e1;
@@ -28,6 +30,7 @@
       }
 
       body {
+        margin: 20px;
         background: #f5f7fa;
         color: var(--dark);
         height: 100vh;
@@ -421,6 +424,143 @@
         color: var(--primary);
       }
 
+      .quick-access form {
+    margin: 0;
+    padding: 0;
+    display: contents; /* This makes the form behave like it's not there from a layout perspective */
+  }
+  
+  /* Make sure the buttons take full width/height of their grid cell */
+  .quick-access-btn {
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-container-wrapper {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.map-controls h2 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+#refresh-map {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#refresh-map:hover {
+  background-color: #45a049;
+}
+
+#map-container {
+  height: 400px;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.alerts-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.alert-card {
+  display: flex;
+  padding: 15px;
+  margin-bottom: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.alert-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.alert-icon {
+  background-color: #ffe8e8;
+  color: #e63946;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+}
+
+.alert-content {
+  flex-grow: 1;
+}
+
+.alert-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.alert-info {
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Different alert levels can have different colors */
+.alert-low .alert-icon {
+  background-color: #e3f2fd;
+  color: #2196f3;
+}
+
+.alert-medium .alert-icon {
+  background-color: #fff3e0;
+  color: #ff9800;
+}
+
+.alert-high .alert-icon {
+  background-color: #ffebee;
+  color: #f44336;
+}
+
+#newPostBtn {
+  display: inline-block;
+  background-color: #4361ee;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 20px;
+  transition: background-color 0.3s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#newPostBtn:hover {
+  background-color: #3651d4;
+}
+
       /* Hide scrollbar but allow scrolling */
       ::-webkit-scrollbar {
         width: 0px;
@@ -432,89 +572,52 @@
     <!-- Header -->
     <div class="header">
       <div class="logo-container">
-        <svg
-          class="logo"
-          viewBox="0 0 200 200"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <!-- Outer Circle -->
-          <circle
-            cx="100"
-            cy="100"
-            r="95"
-            fill="#ffffff"
-            stroke="#4169e1"
-            stroke-width="5"
-          />
-
-          <!-- Shield Background -->
-          <path
-            d="M100,25 C100,25 70,15 40,25 C40,25 40,50 40,90 C40,130 80,160 100,175 C120,160 160,130 160,90 C160,50 160,25 160,25 C130,15 100,25 100,25 Z"
-            fill="#4169e1"
-          />
-
-          <!-- Location Pin in Shield -->
+        <svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- SVG logo content remains unchanged -->
+          <circle cx="100" cy="100" r="95" fill="#ffffff" stroke="#4169e1" stroke-width="5" />
+          <path d="M100,25 C100,25 70,15 40,25 C40,25 40,50 40,90 C40,130 80,160 100,175 C120,160 160,130 160,90 C160,50 160,25 160,25 C130,15 100,25 100,25 Z" fill="#4169e1" />
           <circle cx="100" cy="80" r="12" fill="#ffffff" />
-          <path
-            d="M100,92 C100,92 75,115 100,140 C125,115 100,92 100,92 Z"
-            fill="#ffffff"
-          />
-
-          <!-- Connecting Lines/WiFi Symbol -->
-          <path
-            d="M60,65 A65,65 0 0,1 140,65"
-            stroke="#ffffff"
-            stroke-width="6"
-            fill="transparent"
-          />
-          <path
-            d="M70,50 A50,50 0 0,1 130,50"
-            stroke="#ffffff"
-            stroke-width="6"
-            fill="transparent"
-          />
-          <path
-            d="M80,35 A35,35 0 0,1 120,35"
-            stroke="#ffffff"
-            stroke-width="6"
-            fill="transparent"
-          />
+          <path d="M100,92 C100,92 75,115 100,140 C125,115 100,92 100,92 Z" fill="#ffffff" />
+          <path d="M60,65 A65,65 0 0,1 140,65" stroke="#ffffff" stroke-width="6" fill="transparent" />
+          <path d="M70,50 A50,50 0 0,1 130,50" stroke="#ffffff" stroke-width="6" fill="transparent" />
+          <path d="M80,35 A35,35 0 0,1 120,35" stroke="#ffffff" stroke-width="6" fill="transparent" />
         </svg>
         <div class="logo-text">SafeConnect</div>
       </div>
       <div class="header-actions">
+        <span class="user-greeting" id="user-greeting">Welcome</span>
         <button class="notification-btn">
           <i class="fas fa-bell"></i>
           <span class="notification-count">3</span>
         </button>
-        <button class="profile-btn">
-          <i class="fas fa-user-circle"></i>
-        </button>
+        <form action="/profile" method="get">
+          <button class="profile-btn" id="profile-btn" type="submit">
+            <i class="fas fa-user-circle"></i>
+          </button>
+        </form>
       </div>
     </div>
-
-    <!-- Main Content -->
-    <div class="container">
-      <!-- Safety Header with Location and Score -->
-      <div class="safety-header">
-        <div class="location-container">
-          <i class="fas fa-map-marker-alt location-icon"></i>
-          <div class="location-text">Connaught Place, New Delhi</div>
+    
+    <!-- Update the safety header with dynamic location and safety score -->
+    <div class="safety-header">
+      <div class="location-container">
+        <i class="fas fa-map-marker-alt location-icon"></i>
+        <div class="location-text" id="user-location">Fetching your location...</div>
+      </div>
+      <div class="safety-score-container">
+        <div class="safety-score">
+          <div class="score-number" id="safety-score">--</div>
+          <div class="score-label">
+            Safety Score<br />
+            <small id="safety-status">Calculating...</small>
+          </div>
         </div>
-        <div class="safety-score-container">
-          <div class="safety-score">
-            <div class="score-number">85</div>
-            <div class="score-label">
-              Safety Score<br />
-              <small>Relatively Safe Area</small>
-            </div>
-          </div>
-          <div class="weather-time">
-            <div><i class="fas fa-cloud-sun"></i> 28°C Sunny</div>
-            <div><i class="far fa-clock"></i> 3:45 PM</div>
-          </div>
+        <div class="weather-time">
+          <div id="weather-info"><i class="fas fa-cloud-sun"></i> Loading...</div>
+          <div id="current-time"><i class="far fa-clock"></i> Loading...</div>
         </div>
       </div>
+    </div>
 
       <!-- Track Journey Button -->
       <!-- <button class="track-journey-btn">
@@ -523,176 +626,28 @@
 
       <!-- Quick Access Menu -->
       <div class="quick-access">
-        <button class="quick-access-btn active">
-          <i class="fas fa-home"></i>
-          <span>Home</span>
-        </button>
-        <button class="quick-access-btn">
-          <i class="fas fa-map-marked-alt"></i>
-          <span>Map</span>
-        </button>
-        <button class="quick-access-btn">
-            <a href="resources.html" class="quick-access-btn"></a>
-            <i class="fas fa-book-open"></i>
-            <span>Resources</span>
-        
-        </button> 
-        <button class="quick-access-btn">
-          <i class="fas fa-users"></i>
-          <span>Community</span>
-        </button>
+        <form action="/indexFeed" method="get">
+          <button class="quick-access-btn" id="home-btn" type="submit">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          </button>
+        </form>
+        <form action="/indexMap" method="get">
+          <button class="quick-access-btn" id="map-btn" type="submit">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Map</span>
+          </button>
+        </form>
+        <form action="/indexResource" method="get">
+          <button class="quick-access-btn" id="resources-btn" type="submit">
+              <i class="fas fa-book-open"></i>
+              <span>Resources</span>
+          </button> 
+        </form>
+        <form action="/indexCommunity" method="get">
+          <button class="quick-access-btn" id="community-btn" type="submit">
+            <i class="fas fa-users"></i>
+            <span>Community</span>
+          </button>
+        </form>
       </div>
-
-      <!-- Recent Alerts Section -->
-      <div class="section-header">
-        <div class="section-title">Recent Alerts in Your Vicinity</div>
-        <a href="#" class="see-all">See All</a>
-      </div>
-      <div class="alerts-container">
-        <div class="alert-card">
-          <div class="alert-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-          </div>
-          <div class="alert-content">
-            <div class="alert-title">Suspicious activity reported</div>
-            <div class="alert-info">
-              <span>500m away • Janpath Road</span>
-              <span>10 mins ago</span>
-            </div>
-          </div>
-        </div>
-        <div class="alert-card">
-          <div class="alert-icon">
-            <i class="fas fa-car-crash"></i>
-          </div>
-          <div class="alert-content">
-            <div class="alert-title">Traffic accident</div>
-            <div class="alert-info">
-              <span>1.2km away • Barakhamba Road</span>
-              <span>25 mins ago</span>
-            </div>
-          </div>
-        </div>
-        <div class="alert-card">
-          <div class="alert-icon">
-            <i class="fas fa-shield-alt"></i>
-          </div>
-          <div class="alert-content">
-            <div class="alert-title">Police patrol increased</div>
-            <div class="alert-info">
-              <span>300m away • Connaught Circus</span>
-              <span>1 hour ago</span>
-            </div>
-          </div>
-        </div>
-        <div class="alert-card">
-          <div class="alert-icon">
-            <i class="fas fa-bullhorn"></i>
-          </div>
-          <div class="alert-content">
-            <div class="alert-title">Community safety meeting</div>
-            <div class="alert-info">
-              <span>1.5km away • Community Center</span>
-              <span>Tomorrow, 5 PM</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Emergency Button (always visible) -->
-    <button id="emergency-btn" class="emergency-btn">SOS</button>
-
-    
-    <!-- Notification Popup -->
-    <div id="notification-popup" class="notification-popup">
-      <div class="popup-header">
-        <h3>Notifications</h3>
-        <button id="close-notification-btn" class="close-btn">&times;</button>
-      </div>
-      <div class="popup-body">
-        <ul>
-          <li>New safety alert in your area!</li>
-          <li>Someone shared a safety tip with you.</li>
-          <li>Your journey tracking has started.</li>
-        </ul>
-      </div>
-    </div>
-
-    <script>
-      // JavaScript for interactions
-      document.addEventListener("DOMContentLoaded", function () {
-        // Quick access buttons interaction
-        const quickAccessBtns = document.querySelectorAll(".quick-access-btn");
-
-        quickAccessBtns.forEach((btn) => {
-          btn.addEventListener("click", function () {
-            // Remove active class from all buttons
-            quickAccessBtns.forEach((b) => b.classList.remove("active"));
-            // Add active class to clicked button
-            this.classList.add("active");
-          });
-        });
-        // Get elements
-        const notificationBtn = document.querySelector(".notification-btn");
-        const notificationPopup = document.getElementById("notification-popup");
-        const closeNotificationBtn = document.getElementById(
-          "close-notification-btn"
-        );
-
-        // Show the popup when the notification button is clicked
-        notificationBtn.addEventListener("click", () => {
-          notificationPopup.style.display = "block";
-        });
-
-        // Close the popup when the close button is clicked
-        closeNotificationBtn.addEventListener("click", () => {
-          notificationPopup.style.display = "none";
-        });
-
-        // Close the popup when clicked outside of it
-        window.addEventListener("click", (event) => {
-          if (event.target === notificationPopup) {
-            notificationPopup.style.display = "none";
-          }
-        });
-
-        // Track journey button
-        const trackJourneyBtn = document.querySelector(".track-journey-btn");
-        trackJourneyBtn.addEventListener("click", function () {
-          if (this.innerHTML.includes("Start")) {
-            this.innerHTML =
-              '<i class="fas fa-stop-circle"></i> Stop Journey Tracking';
-            this.style.backgroundColor = "var(--danger)";
-            this.style.color = "white";
-          } else {
-            this.innerHTML =
-              '<i class="fas fa-route"></i> Start Journey Tracking';
-            this.style.backgroundColor = "white";
-            this.style.color = "var(--primary)";
-          }
-        });
-
-        // Emergency button interaction
-        const emergencyBtn = document.getElementById("emergency-btn");
-        emergencyBtn.addEventListener("click", function () {
-          if (confirm("Do you want to trigger the emergency alert?")) {
-            alert("Emergency contacts notified. Help is on the way!");
-            // In a real app, this would trigger emergency protocols
-          }
-        });
-
-        // Bottom navigation
-        const navItems = document.querySelectorAll(".nav-item");
-
-        navItems.forEach((item) => {
-          item.addEventListener("click", function (e) {
-            e.preventDefault();
-            navItems.forEach((i) => i.classList.remove("active"));
-            this.classList.add("active");
-          });
-        });
-      });
-    </script>
-  </body>
-</html>

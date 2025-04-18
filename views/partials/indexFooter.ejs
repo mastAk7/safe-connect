@@ -1,0 +1,336 @@
+<!-- Emergency Button (always visible) -->
+<form action="/sos" method="get">
+  <button id="emergency-btn" class="emergency-btn" type="submit">SOS</button>
+</form>
+
+    
+<!-- Notification Popup -->
+<div id="notification-popup" class="notification-popup">
+  <div class="popup-header">
+    <h3>Notifications</h3>
+    <button id="close-notification-btn" class="close-btn">&times;</button>
+  </div>
+  <div class="popup-body">
+    <ul>
+      <li>New safety alert in your area!</li>
+      <li>Someone shared a safety tip with you.</li>
+      <li>Your journey tracking has started.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Get user profile information
+  fetch('/api/user/profile')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+      return response.json();
+    })
+    .then(user => {
+      // Update user greeting
+      const greeting = document.getElementById('user-greeting');
+      if (greeting && user.name) {
+        greeting.textContent = `Hello, ${user.name.split(' ')[0]}`;
+      }
+      
+      // Set profile picture initial if available
+      const profileBtn = document.getElementById('profile-btn');
+      if (profileBtn && user.name) {
+        profileBtn.innerHTML = `<span class="profile-initial">${user.name.charAt(0).toUpperCase()}</span>`;
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching user profile:', error);
+    });
+
+  // Get and display user's current location
+  function getUserLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude } = position.coords;
+          
+          // Update user location in database
+          updateUserLocation(latitude, longitude);
+          
+          // Reverse geocode to get address
+          reverseGeocode(latitude, longitude);
+          
+          // Get weather for the location
+          getWeather(latitude, longitude);
+          
+          // Calculate safety score for the area
+          calculateSafetyScore(latitude, longitude);
+        },
+        error => {
+          console.error('Error getting location:', error);
+          document.getElementById('user-location').textContent = 'Location access denied';
+        }
+      );
+    } else {
+      document.getElementById('user-location').textContent = 'Geolocation not supported';
+    }
+  }
+
+  // Update user location in database
+  function updateUserLocation(latitude, longitude) {
+    fetch('/api/user/location', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ latitude, longitude }),
+    })
+    .then(response => response.json())
+    .catch(error => {
+      console.error('Error updating location:', error);
+    });
+  }
+
+  // Reverse geocode coordinates to address
+  function reverseGeocode(latitude, longitude) {
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.display_name) {
+          // Simplify the address for display
+          const address = simplifyAddress(data.display_name);
+          document.getElementById('user-location').textContent = address;
+        }
+      })
+      .catch(error => {
+        console.error('Error getting address:', error);
+        document.getElementById('user-location').textContent = 'Unknown location';
+      });
+  }
+
+  // Simplify long addresses for better display
+  function simplifyAddress(address) {
+    const parts = address.split(', ');
+    if (parts.length > 3) {
+      // Return neighborhood, city, state or similar combination
+      return parts.slice(-4, -1).join(', ');
+    }
+    return address;
+  }
+
+  // Get weather information
+  function getWeather(latitude, longitude) {
+    // Replace with your actual weather API
+    // For this example, we'll use a free OpenWeatherMap API
+    const apiKey = 'YOUR_API_KEY'; // You'd need to get this from OpenWeatherMap
+    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${apiKey}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.main && data.weather) {
+          const temp = Math.round(data.main.temp);
+          const weather = data.weather[0].main;
+          const weatherIcon = getWeatherIcon(weather);
+          document.getElementById('weather-info').innerHTML = `<i class="${weatherIcon}"></i> ${temp}°C ${weather}`;
+        }
+      })
+      .catch(error => {
+        console.error('Error getting weather:', error);
+        // Fallback to simulated weather if API fails
+        simulateWeather();
+      });
+  }
+
+  // Simulate weather if API fails
+  function simulateWeather() {
+    const temp = Math.floor(Math.random() * 15) + 20; // Random temp between 20-35°C
+    const conditions = ['Sunny', 'Partly Cloudy', 'Cloudy', 'Light Rain'];
+    const condition = conditions[Math.floor(Math.random() * conditions.length)];
+    const icon = getWeatherIcon(condition);
+    document.getElementById('weather-info').innerHTML = `<i class="${icon}"></i> ${temp}°C ${condition}`;
+  }
+
+  // Get appropriate weather icon
+  function getWeatherIcon(condition) {
+    switch(condition.toLowerCase()) {
+      case 'clear':
+      case 'sunny':
+        return 'fas fa-sun';
+      case 'partly cloudy':
+      case 'clouds':
+        return 'fas fa-cloud-sun';
+      case 'cloudy':
+      case 'overcast':
+        return 'fas fa-cloud';
+      case 'rain':
+      case 'light rain':
+      case 'drizzle':
+        return 'fas fa-cloud-rain';
+      case 'thunderstorm':
+        return 'fas fa-bolt';
+      case 'snow':
+        return 'fas fa-snowflake';
+      case 'mist':
+      case 'fog':
+        return 'fas fa-smog';
+      default:
+        return 'fas fa-cloud-sun';
+    }
+  }
+
+  // Calculate safety score based on location and recent incidents
+  function calculateSafetyScore(latitude, longitude) {
+    // In a real app, you'd make an API call to get incidents near this location
+    // For this demo, we'll simulate a safety score calculation
+    
+    // Get nearby incidents within 5km
+    fetch(`/api/posts?lat=${latitude}&lng=${longitude}&radius=5000`)
+      .then(response => response.json())
+      .then(posts => {
+        // Calculate score based on number and severity of incidents
+        let baseScore = 95; // Start with a high score
+        
+        if (posts && posts.length > 0) {
+          // Reduce score based on number and intensity of incidents
+          const recentPosts = posts.filter(post => {
+            const postDate = new Date(post.createdAt || post.date);
+            const now = new Date();
+            const daysDifference = (now - postDate) / (1000 * 60 * 60 * 24);
+            return daysDifference <= 30; // Only consider posts from last 30 days
+          });
+          
+          // Calculate score reduction based on incidents
+          const scoreReduction = recentPosts.reduce((total, post) => {
+            // Higher intensity incidents reduce score more
+            return total + (post.intensity / 10);
+          }, 0);
+          
+          baseScore = Math.max(30, baseScore - scoreReduction);
+        }
+        
+        // Round to nearest whole number
+        const finalScore = Math.round(baseScore);
+        
+        // Update UI
+        document.getElementById('safety-score').textContent = finalScore;
+        
+        // Set status text based on score
+        let statusText = '';
+        if (finalScore >= 80) {
+          statusText = 'Very Safe Area';
+        } else if (finalScore >= 60) {
+          statusText = 'Relatively Safe Area';
+        } else if (finalScore >= 40) {
+          statusText = 'Exercise Caution';
+        } else {
+          statusText = 'High Alert Area';
+        }
+        
+        document.getElementById('safety-status').textContent = statusText;
+      })
+      .catch(error => {
+        console.error('Error calculating safety score:', error);
+        document.getElementById('safety-score').textContent = '--';
+        document.getElementById('safety-status').textContent = 'Score unavailable';
+      });
+  }
+
+  // Update current time
+  function updateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+    document.getElementById('current-time').innerHTML = `<i class="far fa-clock"></i> ${timeString}`;
+  }
+
+  // Initialize
+  getUserLocation();
+  updateTime();
+  
+  // Update time every minute
+  setInterval(updateTime, 60000);
+});
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Set active button based on current URL path
+    const currentPath = window.location.pathname;
+    
+    // Remove active class from all buttons first
+    const quickAccessBtns = document.querySelectorAll(".quick-access-btn");
+    quickAccessBtns.forEach((btn) => btn.classList.remove("active"));
+    
+    // Add active class based on current path
+    if (currentPath === "/" || currentPath === "/indexFeed") {
+      document.getElementById("home-btn").classList.add("active");
+    } else if (currentPath === "/indexMap") {
+      document.getElementById("map-btn").classList.add("active");
+    } else if (currentPath === "/indexResource") {
+      document.getElementById("resources-btn").classList.add("active");
+    } else if (currentPath === "/indexCommunity") {
+      document.getElementById("community-btn").classList.add("active");
+    }
+
+    // Store the active state when a button is clicked
+    quickAccessBtns.forEach((btn) => {
+      btn.addEventListener("click", function() {
+        // The form submission will navigate to the new page,
+        // and the active state will be set on page load by the code above
+      });
+    });
+
+    // Your other existing JavaScript
+    const notificationBtn = document.querySelector(".notification-btn");
+    const notificationPopup = document.getElementById("notification-popup");
+    const closeNotificationBtn = document.getElementById("close-notification-btn");
+
+    if (notificationBtn && notificationPopup && closeNotificationBtn) {
+      notificationBtn.addEventListener("click", () => {
+        notificationPopup.style.display = "block";
+      });
+
+      closeNotificationBtn.addEventListener("click", () => {
+        notificationPopup.style.display = "none";
+      });
+
+      window.addEventListener("click", (event) => {
+        if (event.target === notificationPopup) {
+          notificationPopup.style.display = "none";
+        }
+      });
+    }
+
+    // Track journey button (if exists)
+    const trackJourneyBtn = document.querySelector(".track-journey-btn");
+    if (trackJourneyBtn) {
+      trackJourneyBtn.addEventListener("click", function () {
+        if (this.innerHTML.includes("Start")) {
+          this.innerHTML = '<i class="fas fa-stop-circle"></i> Stop Journey Tracking';
+          this.style.backgroundColor = "var(--danger)";
+          this.style.color = "white";
+        } else {
+          this.innerHTML = '<i class="fas fa-route"></i> Start Journey Tracking';
+          this.style.backgroundColor = "white";
+          this.style.color = "var(--primary)";
+        }
+      });
+    }
+
+    // Emergency button interaction
+    
+
+    // Bottom navigation
+    const navItems = document.querySelectorAll(".nav-item");
+    navItems.forEach((item) => {
+      item.addEventListener("click", function (e) {
+        e.preventDefault();
+        navItems.forEach((i) => i.classList.remove("active"));
+        this.classList.add("active");
+      });
+    });
+  });
+</script>
+<script src="/map.js"></script>
+</body>
+</html>

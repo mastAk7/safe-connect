@@ -1,0 +1,105 @@
+<%- include('partials/indexHeader') %>
+
+      <!-- Recent Alerts Section -->
+      <div class="section-header">
+        <div class="section-title">Recent Alerts in Your Vicinity</div>
+        <a href="#" class="see-all">See All</a>
+      </div>
+      <a id="newPostBtn" href="/new">New Post</a>
+      
+      <div class="alerts-container">
+        <ul>
+          <% posts.forEach(post => { %>
+            <li>
+              <a href="/post/<%= post._id %>" style="text-decoration: none; color: inherit;">
+                <div class="alert-card">
+                  <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </div>
+                  <div class="alert-content">
+                    <div class="alert-title"><%= post.title %></div>
+                    <div class="alert-info">
+                      <span><%= post.distance %> • <%= post.locationAddress %></span>
+                      <span><%= post.formattedDate %> at <%= post.formattedTime %></span>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </li>
+          <% }); %>  
+        </ul>
+      </div>
+    </div>
+<script>
+  // Replace the existing location script with this improved version
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if user location exists in localStorage and when it was last updated
+  const lastLocationUpdate = localStorage.getItem('lastLocationUpdate');
+  const currentTime = new Date().getTime();
+  
+  // Only update location if it hasn't been updated in the last 15 minutes (900000 ms)
+  if (!lastLocationUpdate || (currentTime - lastLocationUpdate) > 900000) {
+    updateUserLocation();
+  }
+  
+  function updateUserLocation() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        
+        // Send location to server
+        fetch('/api/user/location', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ latitude, longitude }),
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Location updated successfully');
+            // Store timestamp of successful update
+            localStorage.setItem('lastLocationUpdate', new Date().getTime());
+            // Reload page to refresh distances
+            window.location.reload();
+          }
+        })
+        .catch(error => console.error('Error updating location:', error));
+      }, function(error) {
+        console.error("Error getting user location:", error);
+        
+        // Show error message to user based on error code
+        let errorMessage = "Could not determine your location.";
+        
+        if (error.code === 1) {
+          errorMessage = "Location access denied. Please enable location access in your browser settings.";
+        } else if (error.code === 2) {
+          errorMessage = "Location unavailable. Please try again later.";
+        } else if (error.code === 3) {
+          errorMessage = "Location request timed out. Please try again.";
+        }
+        
+        // Display error notification (create this element or use your own notification system)
+        const notification = document.createElement('div');
+        notification.className = 'location-error-notification';
+        notification.textContent = errorMessage;
+        document.body.appendChild(notification);
+        
+        // Remove notification after 5 seconds
+        setTimeout(() => {
+          notification.remove();
+        }, 5000);
+      }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 900000 // 15 minutes
+      });
+    }
+  }
+});
+</script>
+
+    <%- include('partials/indexFooter') %>
+ 

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map Diagnostic Tool</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    #map-container { height: 400px; width: 100%; }
+    .control-panel {
+      background: #f8f9fa;
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    .results {
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .log-entry {
+      margin-bottom: 8px;
+      padding: 8px;
+      background: #eee;
+      border-radius: 4px;
+    }
+    .error { color: red; }
+    .success { color: green; }
+    button { margin-right: 10px; padding: 8px 12px; }
+  </style>
+</head>
+<body>
+  <div class="control-panel">
+    <h2>Map API Diagnostic</h2>
+    <button id="test-api">Test API</button>
+    <button id="test-map">Test Map</button>
+    <button id="clear-logs">Clear Logs</button>
+  </div>
+  
+  <div id="map-container"></div>
+  
+  <div class="results">
+    <h3>Results</h3>
+    <div id="log-container"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    const logContainer = document.getElementById('log-container');
+    
+    function log(message, type = 'info') {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+      logContainer.prepend(entry);
+    }
+    
+    // Test the API directly
+    document.getElementById('test-api').addEventListener('click', async () => {
+      log('Testing API connection...');
+      
+      try {
+        const response = await fetch('/api/posts');
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        
+        const data = await response.json();
+        log(`API returned ${data.length} posts`, 'success');
+        
+        if (data.length > 0) {
+          const firstPost = data[0];
+          log(`Sample post: ${JSON.stringify(firstPost)}`, 'success');
+        } else {
+          log('No posts returned from API', 'error');
+        }
+      } catch (error) {
+        log(`API test failed: ${error.message}`, 'error');
+      }
+    });
+    
+    // Test the map functionality
+    document.getElementById('test-map').addEventListener('click', () => {
+      log('Testing map initialization...');
+      
+      try {
+        // Initialize the map
+        const mapContainer = document.getElementById('map-container');
+        mapContainer.innerHTML = '';
+        
+        const map = L.map('map-container').setView([0, 0], 2);
+        log('Map initialized successfully', 'success');
+        
+        // Add the tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        log('Tile layer added', 'success');
+        
+        // Test adding a marker
+        L.marker([0, 0]).addTo(map).bindPopup('Test marker');
+        log('Test marker added', 'success');
+        
+        // Try to load posts
+        log('Attempting to load posts...');
+        fetch('/api/posts')
+          .then(response => response.json())
+          .then(posts => {
+            log(`Received ${posts.length} posts`, 'success');
+            
+            posts.forEach(post => {
+              if (post.location && post.location.coordinates) {
+                const [lng, lat] = post.location.coordinates;
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                  L.circleMarker([lat, lng], {
+                    radius: 10,
+                    fillColor: 'red',
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                  }).addTo(map).bindPopup(`<strong>${post.title}</strong>`);
+                }
+              }
+            });
+            
+            log('Posts added to map', 'success');
+          })
+          .catch(error => {
+            log(`Error loading posts: ${error.message}`, 'error');
+          });
+      } catch (error) {
+        log(`Map test failed: ${error.message}`, 'error');
+      }
+    });
+    
+    // Clear logs
+    document.getElementById('clear-logs').addEventListener('click', () => {
+      logContainer.innerHTML = '';
+    });
+  </script>
+</body>
+</html>

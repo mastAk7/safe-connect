@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeConnect - <%= post.title %></title>
+  <!-- Font Awesome CDN (v6) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f7fb;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      color: #4361ee;
+      font-weight: bold;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    
+    .logo-icon {
+      background-color: #4361ee;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .user-actions div {
+      cursor: pointer;
+    }
+    
+    .location-bar {
+      background-color: #4361ee;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .location {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    
+    .post-header {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .post-meta {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #e6f0ff;
+      color: #4361ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    .username {
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    
+    .post-time {
+      color: #999;
+    }
+    
+    .verification-badge {
+      background-color: #4361ee;
+      color: white;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 10px;
+    }
+    
+    .post-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .post-content {
+      padding: 15px;
+    }
+    
+    .post-text {
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    
+    .post-image {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      max-height: 400px;
+      object-fit: cover;
+    }
+    
+    .post-image-placeholder {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      height: 300px;
+      background-color: #e6f0ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4361ee;
+    }
+    
+    .post-actions {
+      display: flex;
+      padding: 10px 15px;
+      border-top: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+    
+    .action-button {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-right: 20px;
+      color: #666;
+      font-size: 14px;
+      padding: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .action-button:hover {
+      background-color: #f5f7fb;
+    }
+    
+    .action-button.active {
+      color: #4361ee;
+    }
+    
+    .comments-section {
+      padding: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .sort-options {
+      font-size: 14px;
+      color: #4361ee;
+      cursor: pointer;
+    }
+    
+    .comment {
+      display: flex;
+      margin-bottom: 15px;
+    }
+    
+    .comment-content {
+      flex-grow: 1;
+      margin-left: 10px;
+    }
+    
+    .comment-meta {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 5px;
+    }
+    
+    .comment-text {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    
+    .comment-actions {
+      display: flex;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+    
+    .comment-action {
+      margin-right: 15px;
+      color: #666;
+      cursor: pointer;
+    }
+    
+    .comment-action:hover {
+      color: #4361ee;
+    }
+    
+    .new-comment {
+      display: flex;
+      padding: 15px;
+      border-top: 1px solid #eee;
+    }
+    
+    .comment-input {
+      flex-grow: 1;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      padding: 10px 15px;
+      margin-left: 10px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+    
+    .comment-input:focus {
+      outline: none;
+      border-color: #4361ee;
+    }
+    
+    .emergency-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background-color: #ff4d4d;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(255, 77, 77, 0.4);
+      cursor: pointer;
+      z-index: 100;
+      transition: transform 0.2s;
+    }
+    
+    .emergency-button:hover {
+      transform: scale(1.05);
+    }
+    
+    .location-info {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px;
+      background-color: #f8f9fe;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .location-info i {
+      color: #4361ee;
+      margin-right: 10px;
+    }
+    
+    .intensity-indicator {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      margin-left: 10px;
+    }
+    
+    .low-intensity {
+      background-color: #4cc9f0;
+    }
+    
+    .medium-intensity {
+      background-color: #f8961e;
+    }
+    
+    .high-intensity {
+      background-color: #e63946;
+    }
+    
+    .back-button {
+      color: #4361ee;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    
+    .back-button:hover {
+      background-color: #f0f4ff;
+    }
+    
+    @media (max-width: 600px) {
+      .post-actions {
+        justify-content: space-around;
+      }
+      
+      .action-button {
+        margin: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="location-bar">
+    <div class="location">
+      <div><i class="fa-solid fa-location-dot"></i></div>
+      <div id="current-location">Loading location...</div>
+    </div>
+    <div><i class="fa-solid fa-sun"></i> <span id="current-temp">--°C</span> | <span id="current-time">--:-- --</span></div>
+  </div>
+  
+  <div class="container">
+    <div style="padding: 15px;">
+      <a href="/indexFeed" class="back-button">
+        <i class="fa-solid fa-arrow-left"></i> Back to Feed
+      </a>
+    </div>
+    
+    <div class="post-header">
+      <div class="post-meta">
+        <div class="user-avatar"><%= post.authorInitial %></div>
+        <div class="username"><%= post.authorName %></div>
+        <div class="post-time"><%= post.formattedDate %> at <%= post.formattedTime %></div>
+        <% if (post.authorName === "RajSafety" || post.authorName === "Ayushi") { %>
+          <div class="verification-badge">Verified</div>
+        <% } %>
+      </div>
+      <h1 class="post-title"><%= post.title %></h1>
+      
+      <% if (post.intensity) { %>
+        <div style="margin-top: 5px;">
+          <% 
+            let intensityClass = "";
+            let intensityText = "";
+            
+            if (post.intensity < 33) {
+              intensityClass = "low-intensity";
+              intensityText = "Low Alert";
+            } else if (post.intensity < 66) {
+              intensityClass = "medium-intensity";
+              intensityText = "Medium Alert";
+            } else {
+              intensityClass = "high-intensity";
+              intensityText = "High Alert";
+            }
+          %>
+          <span class="intensity-indicator <%= intensityClass %>"><%= intensityText %></span>
+        </div>
+      <% } %>
+    </div>
+    
+    <div class="post-content">
+      <% if (post.location && post.location.coordinates) { %>
+        <div class="location-info">
+          <i class="fa-solid fa-map-marker-alt"></i>
+          <div>
+            <% if (post.location.address) { %>
+              <%= post.location.address %>
+            <% } else { %>
+              Location: <%= post.location.coordinates[1].toFixed(4) %>, <%= post.location.coordinates[0].toFixed(4) %>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
+      
+      <p class="post-text"><%= post.content %></p>
+      
+      <% if (post.imageBase64) { %>
+        <img src="<%= post.imageBase64 %>" alt="Post image" class="post-image" id="post-image">
+      <% } else { %>
+        <div class="post-image-placeholder">
+          <i class="fa-solid fa-camera"></i> No image available
+        </div>
+      <% } %>
+    </div>
+    
+    <div class="post-actions">
+      <div class="action-button" id="upvote">
+        <span><i class="fa-solid fa-square-check"></i></span> Upvote <span id="upvote-count">(0)</span>
+      </div>
+      <div class="action-button" id="downvote">
+        <span><i class="fa-solid fa-square-xmark"></i></span> Downvote <span id="downvote-count">(0)</span>
+      </div>
+      <div class="action-button" id="comments-toggle">
+        <span><i class="fa-solid fa-comment"></i></span> Comments <span>(0)</span>
+      </div>
+      <div class="action-button" id="share">
+        <span><i class="fa-solid fa-share"></i></span> Share
+      </div>
+      <div class="action-button" id="report">
+        <span><i class="fa-solid fa-flag"></i></span> Report
+      </div>
+    </div>
+    
+    <div class="comments-section" id="comments-container">
+      <div class="section-title">
+        Comments
+        <span class="sort-options">Sort by: Recent ▼</span>
+      </div>
+      
+      <!-- Comments will be loaded here -->
+      <div id="comments-list">
+        <!-- Sample comment structure -->
+        <div class="comment">
+          <div class="user-avatar">S</div>
+          <div class="comment-content">
+            <div class="comment-meta">
+              <span class="username">SafetyFirst</span> • just now
+            </div>
+            <div class="comment-text">
+              Thank you for sharing this information. Everyone please stay safe!
+            </div>
+            <div class="comment-actions">
+              <div class="comment-action like-comment">👍 <span>0</span></div>
+              <div class="comment-action">Reply</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="new-comment">
+      <div class="user-avatar"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+      <input type="text" class="comment-input" id="comment-input" placeholder="Write a comment...">
+    </div>
+  </div>
+  
+  <form action="/sos" method="get">
+    <button class="emergency-button" id="emergency-button" type="submit"> SOS </button>
+  </form>
+
+  <script>
+    // Update current time
+    function updateTime() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const formattedHours = hours % 12 || 12;
+      const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+      document.getElementById('current-time').textContent = `${formattedHours}:${formattedMinutes} ${ampm}`;
+    }
+    
+    // Run updateTime immediately and then every minute
+    updateTime();
+    setInterval(updateTime, 60000);
+    
+    // Upvote/Downvote functionality
+    const upvoteButton = document.getElementById('upvote');
+    const downvoteButton = document.getElementById('downvote');
+    let upvoteCount = 0;
+    let downvoteCount = 0;
+    let hasUpvoted = false;
+    let hasDownvoted = false;
+    
+    upvoteButton.addEventListener('click', function() {
+      if (!hasUpvoted) {
+        upvoteCount++;
+        document.getElementById('upvote-count').textContent = `(${upvoteCount})`;
+        upvoteButton.classList.add('active');
+        
+        if (hasDownvoted) {
+          downvoteCount--;
+          document.getElementById('downvote-count').textContent = `(${downvoteCount})`;
+          downvoteButton.classList.remove('active');
+          hasDownvoted = false;
+        }
+        
+        hasUpvoted = true;
+      } else {
+        upvoteCount--;
+        document.getElementById('upvote-count').textContent = `(${upvoteCount})`;
+        upvoteButton.classList.remove('active');
+        hasUpvoted = false;
+      }
+    });
+    
+    downvoteButton.addEventListener('click', function() {
+      if (!hasDownvoted) {
+        downvoteCount++;
+        document.getElementById('downvote-count').textContent = `(${downvoteCount})`;
+        downvoteButton.classList.add('active');
+        
+        if (hasUpvoted) {
+          upvoteCount--;
+          document.getElementById('upvote-count').textContent = `(${upvoteCount})`;
+          upvoteButton.classList.remove('active');
+          hasUpvoted = false;
+        }
+        
+        hasDownvoted = true;
+      } else {
+        downvoteCount--;
+        document.getElementById('downvote-count').textContent = `(${downvoteCount})`;
+        downvoteButton.classList.remove('active');
+        hasDownvoted = false;
+      }
+    });
+    
+    // Comment functionality
+    const commentInput = document.getElementById('comment-input');
+    const commentsContainer = document.getElementById('comments-list');
+    
+    commentInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && commentInput.value.trim() !== '') {
+        const commentText = commentInput.value.trim();
+        
+        // Create new comment element
+        const newComment = document.createElement('div');
+        newComment.className = 'comment';
+        newComment.innerHTML = `
+          <div class="user-avatar"><%= user.name ? user.name.charAt(0).toUpperCase() : 'U' %></div>
+          <div class="comment-content">
+            <div class="comment-meta">
+              <span class="username">Me</span> • just now
+            </div>
+            <div class="comment-text">
+              ${commentText}
+            </div>
+            <div class="comment-actions">
+              <div class="comment-action like-comment">👍 <span>0</span></div>
+              <div class="comment-action">Reply</div>
+            </div>
+          </div>
+        `;
+        
+        // Insert new comment at the beginning of the list
+        commentsContainer.insertBefore(newComment, commentsContainer.firstChild);
+        
+        // Clear input
+        commentInput.value = '';
+      }
+    });
+    
+    // Like comment functionality
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('like-comment') || e.target.parentElement.classList.contains('like-comment')) {
+        const likeButton = e.target.classList.contains('like-comment') ? e.target : e.target.parentElement;
+        const countSpan = likeButton.querySelector('span');
+        let count = parseInt(countSpan.textContent);
+        
+        if (!likeButton.classList.contains('active')) {
+          count++;
+          likeButton.classList.add('active');
+        } else {
+          count--;
+          likeButton.classList.remove('active');
+        }
+        
+        countSpan.textContent = count;
+      }
+    });
+    
+    // Emergency button functionalit
+    
+    // Get geolocation for header
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        // Reverse geocode to get location name
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+          .then(response => response.json())
+          .then(data => {
+            const location = data.address.suburb || data.address.city || data.address.town || data.address.state;
+            document.getElementById('current-location').textContent = location ? location : 'Current Location';
+          })
+          .catch(() => {
+            document.getElementById('current-location').textContent = 'Current Location';
+          });
+        
+        // Get weather info (in a real app)
+        document.getElementById('current-temp').textContent = '28°C';
+      }, function() {
+        document.getElementById('current-location').textContent = 'Location access denied';
+      });
+    } else {
+      document.getElementById('current-location').textContent = 'Geolocation not supported';
+    }
+  </script>
+</body>
+</html>

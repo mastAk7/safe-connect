@@ -76,7 +76,6 @@ body {
 
 .login-screen, .signup-screen, .aadhaar-verification {
     padding: 30px;
-    display: none;
     animation: fadeIn 0.5s;
 }
 
@@ -491,3 +490,13 @@ p {
 
 
 /* for dashboard.html */
+
+.hidden {
+    display: none;
+}
+
+.locked-input {
+    background-color: #f2f4f8;
+    color: #666;
+    cursor: not-allowed;
+}

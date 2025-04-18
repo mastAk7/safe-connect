@@ -8,7 +8,7 @@ import env from 'dotenv';
 import admin from 'firebase-admin';
 import cors from 'cors';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import multer from 'multer'
+import multer from 'multer' 
 
 const router = express.Router()
 
@@ -345,22 +345,31 @@ app.get("/sos", isAuthenticated, async (req, res) => {
   }
 });
 
+
 app.post("/api/sos/alert", isAuthenticated, async (req, res) => {
   try {
-    const { latitude, longitude, emergencyType, description, severity,isAnonymous } = req.body;
+    console.log("SOS alert received:", req.body);
     
+    const { latitude, longitude, emergencyType, description, severity, isAnonymous } = req.body;
+    
+    // Check if required fields are present
     if (!latitude || !longitude || !emergencyType) {
+      console.log("Missing required fields:", { latitude, longitude, emergencyType });
       return res.status(400).json({
         success: false,
         message: 'Missing required fields'
       });
     }
     
+    console.log("Updating user location for user:", req.user._id);
+    
     // Update user's current location
     await User.findByIdAndUpdate(req.user._id, {
       'location.coordinates': [longitude, latitude],
       'location.lastUpdated': new Date()
     });
+    
+    console.log("Finding nearest volunteers");
     
     // Find nearest volunteers within 10km radius
     const nearestVolunteers = await User.find({
@@ -375,6 +384,8 @@ app.post("/api/sos/alert", isAuthenticated, async (req, res) => {
         }
       }
     }).limit(5);
+    
+    console.log("Found volunteers:", nearestVolunteers.length);
     
     // Create an emergency alert record
     const alert = new Emergency({
@@ -391,32 +402,59 @@ app.post("/api/sos/alert", isAuthenticated, async (req, res) => {
       notifiedVolunteers: nearestVolunteers.map(v => v._id)
     });
     
+    console.log("Saving emergency alert");
+    
     await alert.save();
+    
+    console.log("Alert saved successfully");
     
     res.json({
       success: true,
       message: 'Emergency alert sent to nearest volunteers',
-      volunteers: nearestVolunteers.length
+      alertId: alert._id, // Send the alert ID back for cancellation
+      volunteers: nearestVolunteers.length // Return actual number of volunteers
     });
   } catch (error) {
     console.error('SOS alert error:', error);
-    res.status(500).json({ success: false, message: 'Failed to sendalert' });
+    res.status(500).json({ success: false, message: 'Failed to send alert' });
   }
-});  
+}); 
+ 
 
 app.post("/api/sos/cancel", isAuthenticated, async (req, res) => {
   try {
     const { alertId } = req.body;
     
+    if (!alertId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Alert ID is required'
+      });
+    }
+    
     // Find and update the active alert for this user
-    await Emergency.findOneAndUpdate(
-      { _id: alertId, user: req.user._id, status: 'active' },
+    const result = await Emergency.findOneAndUpdate(
+      { _id: alertId, user: req.user._id, status: { $in: ['active', 'responding'] } },
       { status: 'cancelled' }
     );
     
-    res.json({ success: true, message: 'Emergency alert cancelled' });
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: 'Active alert not found'
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Emergency alert cancelled' 
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to cancel alert' });
+    console.error('Error cancelling alert:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to cancel alert' 
+    });
   }
 });
 
@@ -642,14 +680,16 @@ app.post('/api/volunteer/location', isAuthenticated, isVolunteer, async (req, re
   }
 });
 
-
+app.get("/loginOptions", (req,res) => {
+  res.render("loginOptions.ejs");
+})
 
 // Authentication routes
 app.get("/", (req, res) => {
   if (req.isAuthenticated()) {
-    res.redirect("/blog");
+    res.redirect("/indexFeed");
   } else {
-    res.render("home.ejs");
+    res.render("login.ejs");
   }
 });
 
@@ -664,34 +704,238 @@ app.get("/logout", (req, res) => {
   });
 });
 
-
-// Blog routes (protected by authentication)
-app.get("/blog", isAuthenticated, (req, res) => {
-    Post.find({})
-    .then(blogArray => {
-        const formattedPosts = blogArray.map(post => {
-          let imageBase64 = null;
-          if (post.image && post.image.data) {
-            imageBase64 = `data:${post.image.contentType};base64,${post.image.data.toString('base64')}`;
-          }
-          return {
-            ...post.toObject(),
-            imageBase64
-          };
-        });
-  
-        res.render("index.ejs", { 
-          posts: formattedPosts,
-          user: req.user 
-        });
-    })
-    .catch(err => {
-        res.send({err, message: "Error fetching blogs"});
+// Route to view a single post
+app.get("/post/:id", isAuthenticated, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).render("error.ejs", { 
+        message: "Post not found",
+        user: req.user
+      });
+    }
+    
+    // Format the post data
+    let imageBase64 = null;
+    if (post.image && post.image.data) {
+      imageBase64 = `data:${post.image.contentType};base64,${post.image.data.toString('base64')}`;
+    }
+    
+    // Format date and time
+    const postDate = post.date || new Date();
+    const formattedDate = postDate.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
     });
+    const formattedTime = postDate.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+    
+    // Get author info
+    const author = await User.findOne({ email: post.author });
+    const authorName = author ? author.name : "Unknown User";
+    const authorInitial = authorName ? authorName.charAt(0).toUpperCase() : "?";
+    
+    // Get comments (if you implement this feature)
+    // const comments = await Comment.find({ postId: post._id }).sort({ createdAt: -1 });
+    
+    res.render("postDetail.ejs", {
+      post: {
+        ...post.toObject(),
+        imageBase64,
+        formattedDate,
+        formattedTime,
+        authorName,
+        authorInitial
+      },
+      user: req.user,
+      // comments: comments
+    });
+  } catch (err) {
+    console.error("Error fetching post details:", err);
+    res.status(500).render("error.ejs", { 
+      message: "Error loading post",
+      user: req.user
+    });
+  }
 });
 
+// Blog routes (protected by authentication)
+// Modify the indexFeed route to include distance sorting
+app.get("/indexFeed", isAuthenticated, async (req, res) => {
+  try {
+    // First get the current user's location
+    const user = await User.findById(req.user._id);
+    const userCoordinates = user.location.coordinates; // [longitude, latitude]
+    
+    // Function to calculate distance between two points using the Haversine formula
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      // Convert to radians
+      const toRad = value => value * Math.PI / 180;
+      
+      const R = 6371; // Radius of the Earth in km
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = 
+          Math.sin(dLat/2) * Math.sin(dLat/2) +
+          Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+          Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distance = R * c; // Distance in km
+      
+      return distance;
+    }
+
+    function shortenAddress(address) {
+      // [existing shortenAddress function]
+    }
+    
+    // Get all posts
+    const posts = await Post.find({});
+    
+    // Format posts and add distance info
+    const formattedPosts = await Promise.all(posts.map(async post => {
+      let imageBase64 = null;
+      if (post.image && post.image.data) {
+          imageBase64 = `data:${post.image.contentType};base64,${post.image.data.toString('base64')}`;
+      }
+      
+      // Default values
+      let distanceText = "Unknown distance";
+      let locationAddress = "Unknown location";
+      let distanceValue = Number.MAX_VALUE; // For sorting, default to maximum value
+      
+      // Validate coordinates - ensure neither set is 0,0 or invalid
+      if (post.location && post.location.coordinates && 
+          post.location.coordinates.length === 2 && 
+          userCoordinates && userCoordinates.length === 2) {
+          
+          const [postLng, postLat] = post.location.coordinates;
+          const [userLng, userLat] = userCoordinates;
+          
+          // Check for valid coordinates - all must be non-zero and valid numbers
+          const hasValidPostCoords = postLat !== undefined && postLng !== undefined && 
+                                  !isNaN(postLat) && !isNaN(postLng) && 
+                                  !(Math.abs(postLat) < 0.000001 && Math.abs(postLng) < 0.000001);
+                                  
+          const hasValidUserCoords = userLat !== undefined && userLng !== undefined && 
+                                  !isNaN(userLat) && !isNaN(userLng) && 
+                                  !(Math.abs(userLat) < 0.000001 && Math.abs(userLng) < 0.000001);
+          
+          // Calculate distance only if all coordinates are valid
+          if (hasValidPostCoords && hasValidUserCoords) {
+              const distance = calculateDistance(postLat, postLng, userLat, userLng);
+              
+              // Ensure distance is valid
+              if (!isNaN(distance) && distance >= 0) {
+                  distanceValue = distance; // Store the raw distance value for sorting
+                  const roundedDistance = Math.round(distance * 10) / 10; // Round to 1 decimal place
+                  distanceText = `${roundedDistance} km away`;
+              }
+          }
+          
+          // Address handling
+          if (post.location.address) {
+              // Use stored address if available
+              locationAddress = shortenAddress(post.location.address);
+          } else if (hasValidPostCoords) {
+              // Try to get address from coordinates if needed
+              try {
+                  const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${postLat}&lon=${postLng}`);
+                  
+                  if (response.ok) {
+                      const data = await response.json();
+                      
+                      // Extract and shorten address
+                      if (data && data.display_name) {
+                          locationAddress = shortenAddress(data.display_name);
+                          
+                          // Store the address for future use
+                          await Post.findByIdAndUpdate(post._id, {
+                              'location.address': data.display_name
+                          });
+                      }
+                  }
+              } catch (error) {
+                  console.error("Error getting location address:", error);
+                  // Use fallback location name based on coordinates
+                  locationAddress = `Location (${Math.round(postLat * 100) / 100}, ${Math.round(postLng * 100) / 100})`;
+              }
+          }
+      }
+      
+      // Format date and time
+      const postDate = post.date || new Date();
+      const formattedDate = postDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+      });
+      const formattedTime = postDate.toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit'
+      });
+      
+      return {
+          ...post.toObject(),
+          imageBase64,
+          distance: distanceText,
+          distanceValue, // Raw distance value for sorting
+          locationAddress, // shortened address
+          formattedDate,
+          formattedTime,
+          locationDisplay: `${distanceText} • ${locationAddress}`
+      };
+    }));
+    
+    // Sort posts by distance (nearest first)
+    // Posts with unknown distance will appear at the end
+    formattedPosts.sort((a, b) => {
+      // If both posts have valid distance values
+      if (a.distanceValue !== Number.MAX_VALUE && b.distanceValue !== Number.MAX_VALUE) {
+        return a.distanceValue - b.distanceValue;
+      }
+      // If only post a has a valid distance
+      else if (a.distanceValue !== Number.MAX_VALUE) {
+        return -1; // a comes first
+      }
+      // If only post b has a valid distance
+      else if (b.distanceValue !== Number.MAX_VALUE) {
+        return 1; // b comes first
+      }
+      // If neither has a valid distance, sort by date (newest first)
+      else {
+        return new Date(b.date) - new Date(a.date);
+      }
+    });
+    
+    res.render("indexDashboard.ejs", { 
+        posts: formattedPosts,
+        user: req.user 
+    });
+  } catch (err) {
+    console.error("Error in indexFeed route:", err);
+    res.status(500).send({err, message: "Error fetching blogs"});
+  }
+});
+
+app.get("/indexMap", isAuthenticated, (req,res) => {
+  res.render("indexMap.ejs");
+})
+
+app.get("/indexResource", isAuthenticated, (req,res) => {
+  res.render("indexResource.ejs");
+})
+
+app.get("/indexCommunity", isAuthenticated, (req,res) => {
+  res.render("indexCommunity.ejs");
+})
+
 app.get("/new", isAuthenticated, (req, res) => {
-  res.render("modify.ejs", { 
+  res.render("addPost.ejs", { 
     heading: "New Post", 
     submit: "Create Post",
     user: req.user
@@ -737,7 +981,7 @@ app.get("/edit/:id", isAuthenticated, (req, res) => {
 app.get("/delete/:id", isAuthenticated, (req, res) => {
   Post.findByIdAndDelete(req.params.id)
       .then(() => {
-        res.redirect("/blog");
+        res.redirect("/indexFeed");
       })
       .catch(err => {
         res.status(500).send("Error deleting post");
@@ -748,7 +992,7 @@ app.get("/addDetails", isAuthenticated ,(req,res) => {
     if(req.user.name){
         res.redirect('/');
     } else{
-        res.render('addDetails.ejs', {user : req.user})
+        res.render('loginUser.ejs', {user : req.user})
     }
 })
 
@@ -776,7 +1020,7 @@ app.post("/addDetails", (req,res) => {
                 console.log("Error updating:", err);
             })
     }
-    res.redirect("/blog");
+    res.redirect("/indexFeed");
 })
 
 app.post("/add/posts", isAuthenticated, upload.single('image'), (req, res) => {
@@ -799,7 +1043,7 @@ app.post("/add/posts", isAuthenticated, upload.single('image'), (req, res) => {
     
     post.save()
     .then(() => {
-        res.redirect("/blog");
+        res.redirect("/indexFeed");
     })
     .catch(err => {
         res.status(500).json({ message: "Error creating post", error: err });
@@ -833,7 +1077,7 @@ app.post("/add/posts/:id", isAuthenticated, upload.single('image'), (req, res) =
         return post.save();
       })
       .then(() => {
-        res.redirect("/blog");  // Redirect to the blog page after update
+        res.redirect("/indexFeed");  // Redirect to the blog page after update
       })
       .catch(err => {
         res.status(500).json({ message: "Error updating post", error: err });
@@ -841,44 +1085,167 @@ app.post("/add/posts/:id", isAuthenticated, upload.single('image'), (req, res) =
   });
 
 
+// Add this route to your Express app
+app.get('/api/user/profile', isAuthenticated, async (req, res) => {
+  try {
+    // Find the user in the database
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Return only necessary user information
+    res.json({
+      name: user.name || 'User',
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      // Only return location if it's valid (not default 0,0)
+      location: user.location && user.location.coordinates && 
+               (Math.abs(user.location.coordinates[0]) > 0.0001 || 
+                Math.abs(user.location.coordinates[1]) > 0.0001) ? 
+                {
+                  latitude: user.location.coordinates[1],  // MongoDB stores as [lng, lat]
+                  longitude: user.location.coordinates[0]
+                } : null
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error fetching profile information' 
+    });
+  }
+});
+
+app.post('/api/user/profile', isAuthenticated, async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    
+    // Basic validation
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: 'Name is required'
+      });
+    }
+    
+    // Update user in database
+    await User.findByIdAndUpdate(req.user._id, {
+      name,
+      email,
+      phone
+    });
+    
+    res.json({
+      success: true,
+      message: 'Profile updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update profile'
+    });
+  }
+});
+
+app.get("/profile", isAuthenticated, (req, res) => {
+  res.render("profile.ejs", { user: req.user });
+});
 
 
-
+// Add a route to update user location
+// Add this route to your Express app
+app.post('/api/user/location', isAuthenticated, async (req, res) => {
+  try {
+    const { latitude, longitude } = req.body;
+    
+    // Validate the coordinates
+    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid coordinates provided' 
+      });
+    }
+    
+    // Update user's location in the database
+    // NOTE: MongoDB GeoJSON requires [longitude, latitude] order
+    await User.findByIdAndUpdate(req.user._id, {
+      'location.coordinates': [longitude, latitude],
+      'location.type': 'Point',
+      'location.lastUpdated': new Date()
+    });
+    
+    res.json({ success: true, message: 'Location updated successfully' });
+  } catch (err) {
+    console.error('Error updating user location:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error updating location'
+    });
+  }
+});
 
 // Route to get posts for map view
 router.get('/api/posts', async (req, res) => {
-    try {
-      const { lat, lng, radius = 25000 } = req.query; // radius in meters
-      
-      let query = {};
-      
-      // If coordinates are provided, filter by proximity
-      if (lat && lng) {
-        query = {
-          location: {
-            $near: {
-              $geometry: {
-                type: 'Point',
-                coordinates: [parseFloat(lng), parseFloat(lat)]
-              },
-              $maxDistance: parseInt(radius, 10)
-            }
+  try {
+    console.log('API Request to /api/posts with query:', req.query);
+    const { lat, lng, radius = 25000 } = req.query; // radius in meters
+    
+    let query = {};
+    
+    // If coordinates are provided, filter by proximity
+    if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+      console.log(`Searching for posts near [${lat}, ${lng}] within ${radius}m`);
+      query = {
+        location: {
+          $near: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [parseFloat(lng), parseFloat(lat)]
+            },
+            $maxDistance: parseInt(radius, 10)
           }
-        };
-      }
-      
-      const posts = await Post.find(query)
-        .select('title content intensity location createdAt')
-        .sort({ createdAt: -1 })
-        .limit(100);
-      
-      res.json(posts);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      res.status(500).json({ error: 'Server error' });
+        }
+      };
+    } else {
+      console.log('No valid coordinates provided, returning all posts');
     }
-  });
-  
+    
+    console.log('MongoDB query:', JSON.stringify(query));
+    
+    // If no coordinates, just get recent posts
+    const posts = await Post.find(query)
+      .select('title content intensity location createdAt')
+      .sort({ createdAt: -1 })
+      .limit(100);
+    
+    console.log(`Found ${posts.length} posts`);
+    
+    // Check if we got results
+    if (posts.length === 0) {
+      console.log('No posts found matching query');
+    } else {
+      // Log the first few posts for debugging
+      console.log('Sample posts:', posts.slice(0, 2).map(p => ({
+        title: p.title,
+        loc: p.location && p.location.coordinates,
+        intensity: p.intensity
+      })));
+    }
+    
+    res.json(posts);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ 
+      error: 'Server error', 
+      details: error.message,
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
+    });
+  }
+});
 
 // Passport session serialization
 passport.serializeUser((user, cb) => {

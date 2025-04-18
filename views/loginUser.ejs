@@ -1,0 +1,58 @@
+<%- include('partials/loginHeader') %>
+
+<div id="signup-screen" class="signup-screen">
+    <div class="splash-logo-container" style="width: 100px; height: 100px;">
+        <svg class="splash-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Outer Circle -->
+            <circle cx="100" cy="100" r="95" fill="#ffffff" stroke="#4169e1" stroke-width="5"/>
+           
+            <!-- Shield Background -->
+            <path d="M100,25 C100,25 70,15 40,25 C40,25 40,50 40,90 C40,130 80,160 100,175 C120,160 160,130 160,90 C160,50 160,25 160,25 C130,15 100,25 100,25 Z" fill="#4169e1"/>
+           
+            <!-- Location Pin in Shield -->
+            <circle cx="100" cy="80" r="12" fill="#ffffff"/>
+            <path d="M100,92 C100,92 75,115 100,140 C125,115 100,92 100,92 Z" fill="#ffffff"/>
+           
+            <!-- Connecting Lines/WiFi Symbol -->
+            <path d="M60,65 A65,65 0 0,1 140,65" stroke="#ffffff" stroke-width="6" fill="transparent"/>
+            <path d="M70,50 A50,50 0 0,1 130,50" stroke="#ffffff" stroke-width="6" fill="transparent"/>
+            <path d="M80,35 A35,35 0 0,1 120,35" stroke="#ffffff" stroke-width="6" fill="transparent"/>
+           
+            <!-- Text at bottom -->
+            <text x="100" y="190" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#4169e1" text-anchor="middle">SafeConnect</text>
+        </svg>
+    </div>
+    <h1>Create Account</h1>
+    <p>Join SafeConnect for a safer community</p>
+
+    <form action="/addDetails" method="post">
+        
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Enter your full name" required>
+        </div>
+
+        <% if(locals.user.email){ %>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="Enter your phone number" value="+91" required>
+            </div>
+        <% } else{ %>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email address" required>
+            </div>
+        <% } %>
+        
+        <button id="signup-continue-btn" class="btn" type="submit">Continue</button>
+       
+       
+    </form>
+   
+   
+    <div class="footer-text">
+        By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+    </div>
+</div>
+
+<%- include('partials/loginFooter') %>
