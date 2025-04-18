@@ -46,7 +46,7 @@ function init() {
   // Only start countdown if element exists and we're showing countdown
   // Also check that no countdown is already running
   if (countdownEl && countdownContainer && 
-      !countdownContainer.style.display.includes('none') && 
+      !countdownContainer.style.display?.includes('none') && 
       !countdownInterval) {
     console.log('Starting countdown');
     startCountdown();
@@ -63,19 +63,25 @@ function setupEventListeners() {
   // Type selection
   if (emergencyTypes && emergencyTypes.length) {
     console.log(`Setting up ${emergencyTypes.length} emergency type listeners`);
+    
+    // Store references to the cloned elements
+    const clonedTypes = [];
+    
     emergencyTypes.forEach(type => {
       // Remove any existing event listeners first
       const typeClone = type.cloneNode(true);
+      clonedTypes.push(typeClone);
+      
       if (type.parentNode) {
         type.parentNode.replaceChild(typeClone, type);
       }
       
       // Add fresh event listener
       typeClone.addEventListener('click', () => {
-        // Remove active class from all types
-        emergencyTypes.forEach(t => t.classList.remove('active'));
-        // Add active class to selected type
-        typeClone.classList.add('active');
+        // Remove selected class from all types
+        clonedTypes.forEach(t => t.classList.remove('selected'));
+        // Add selected class to selected type
+        typeClone.classList.add('selected');
         // Store selected type
         selectedEmergencyType = typeClone.id.replace('type-', '');
         console.log(`Selected emergency type: ${selectedEmergencyType}`);
@@ -154,8 +160,6 @@ function setupEventListeners() {
         safeNowBtnClone.disabled = false;
       }, 3000);
     });
-  } else {
-    console.warn('Safe now button not found');
   }
 }
 
@@ -180,7 +184,10 @@ function startCountdown() {
   
   countdownInterval = setInterval(() => {
     countdownSeconds--;
-    countdownEl.textContent = countdownSeconds;
+    
+    if (countdownEl) {
+      countdownEl.textContent = countdownSeconds;
+    }
     
     if (countdownSeconds <= 0) {
       clearInterval(countdownInterval);
@@ -264,23 +271,7 @@ function markUserAsSafe(event) {
   });
 }
 
-// DOM loaded event listener - only init once
-let domInitialized = false;
-document.addEventListener('DOMContentLoaded', function() {
-  if (!domInitialized) {
-    console.log('DOM loaded, initializing emergency system');
-    init();
-    domInitialized = true;
-  }
-});
-
-// Only call init directly if DOM is already loaded
-if (document.readyState === 'complete' && !initialized) {
-  console.log('Document already loaded, initializing immediately');
-  init();
-}
-
-// Add this function to your emergency.js file
+// Get user's location
 function getUserLocation() {
   console.log('Getting user location...');
   
@@ -316,12 +307,31 @@ function getUserLocation() {
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
           .then(response => response.json())
           .then(data => {
-            userAddressEl.textContent = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            if (userAddressEl) {
+              userAddressEl.textContent = data.display_name || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            }
           })
           .catch(error => {
             console.error('Error getting address:', error);
-            userAddressEl.textContent = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            if (userAddressEl) {
+              userAddressEl.textContent = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            }
           });
+      }
+      
+      // Try to update map preview if available
+      try {
+        const mapPreview = document.querySelector('.map-preview img');
+        if (mapPreview) {
+          // Update map image with coordinates (using placeholder as fallback)
+          const mapUrl = `/api/map/static?lat=${latitude}&lng=${longitude}&zoom=15&width=400&height=150`;
+          mapPreview.src = mapUrl;
+          mapPreview.onerror = () => {
+            mapPreview.src = '/api/placeholder/400/150';
+          };
+        }
+      } catch (mapError) {
+        console.error('Error updating map preview:', mapError);
       }
     },
     // Error callback
@@ -358,7 +368,7 @@ function getUserLocation() {
   );
 }
 
-// Add this function to your emergency.js file
+// Send emergency alert
 function sendEmergencyAlert() {
   console.log('Sending emergency alert...');
   
@@ -394,10 +404,13 @@ function sendEmergencyAlert() {
     description, severity, isAnonymous
   });
   
+  // Find the submit button in the current DOM (it might have been replaced)
+  const currentSubmitBtn = document.querySelector('.submit-btn');
+  
   // Disable submit button to prevent multiple submissions
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending...';
+  if (currentSubmitBtn) {
+    currentSubmitBtn.disabled = true;
+    currentSubmitBtn.textContent = 'Sending...';
   }
   
   // Send data to server
@@ -446,9 +459,10 @@ function sendEmergencyAlert() {
       alert('Failed to send alert: ' + (data.message || 'Please try again.'));
       
       // Re-enable submit button
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Send Alert';
+      const updatedSubmitBtn = document.querySelector('.submit-btn');
+      if (updatedSubmitBtn) {
+        updatedSubmitBtn.disabled = false;
+        updatedSubmitBtn.textContent = 'Send Alert';
       }
     }
   })
@@ -457,9 +471,48 @@ function sendEmergencyAlert() {
     alert('Failed to send alert. Please try again or call emergency services directly.');
     
     // Re-enable submit button
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Send Alert';
+    const updatedSubmitBtn = document.querySelector('.submit-btn');
+    if (updatedSubmitBtn) {
+      updatedSubmitBtn.disabled = false;
+      updatedSubmitBtn.textContent = 'Send Alert';
     }
   });
 }
+
+// Cleanup function when navigating away
+function cleanup() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  initialized = false;
+}
+
+// Add listener for page visibility changes
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') {
+    cleanup();
+  } else if (document.visibilityState === 'visible' && !initialized) {
+    // Re-initialize if coming back to the page and not initialized
+    init();
+  }
+});
+
+// DOM loaded event listener - only init once
+let domInitialized = false;
+document.addEventListener('DOMContentLoaded', function() {
+  if (!domInitialized) {
+    console.log('DOM loaded, initializing emergency system');
+    init();
+    domInitialized = true;
+  }
+});
+
+// Only call init directly if DOM is already loaded
+if (document.readyState === 'complete' && !initialized) {
+  console.log('Document already loaded, initializing immediately');
+  init();
+}
+
+// Add event listener for beforeunload to clean up
+window.addEventListener('beforeunload', cleanup);
