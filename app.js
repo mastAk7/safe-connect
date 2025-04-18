@@ -199,13 +199,17 @@ function isVolunteer(req, res, next) {
   res.status(403).json({ message: 'Access denied. Volunteer status required.' });
 }
 
+const CALLBACK_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://safe-connect-n3d5.onrender.com/auth/google/secrets'
+  : 'http://localhost:3000/auth/google/secrets';
+
 // Google authentication strategy
 passport.use(
   "google",
   new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
+    callbackURL: CALLBACK_URL,
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
   }, (accessToken, refreshToken, profile, cb) => {
     User.findOne({email : profile.emails[0].value}) 
