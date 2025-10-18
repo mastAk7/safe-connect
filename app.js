@@ -280,6 +280,8 @@ passport.use('firebase-phone', new CustomStrategy(
   }
 ));
 
+app.get("/health", (_, res) => res.send("ok"));
+
 // Google authentication endpoint
 app.get('/auth/google', passport.authenticate("google", {
   scope: ["profile", "email"],
