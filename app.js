@@ -281,6 +281,7 @@ passport.use('firebase-phone', new CustomStrategy(
 ));
 
 app.get("/health", (_, res) => res.send("ok"));
+app.head('/health', (_req, res) => res.sendStatus(200));
 
 // Google authentication endpoint
 app.get('/auth/google', passport.authenticate("google", {
